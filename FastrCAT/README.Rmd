@@ -38,7 +38,9 @@ library(devtools)
 
 creds = git2r::cred_ssh_key("C:\\Users\\MYSELF\\.ssh\\id_rsa.pub",
                             "C:\\Users\\MYSELF\\.ssh\\id_rsa")
+
 devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
                       credentials = creds)
 ```
 
+MYSELF is your named folder in your home directory. When you have set up your ssh key using GitLab there will be a .ssh folder in your named folder. You can copy/paste the code above just change the MYSELF to the name of your named folder. 
