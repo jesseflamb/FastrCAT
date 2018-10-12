@@ -64,63 +64,65 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # When file has header information --------------------------------------------
 
 # Get latitude ----------------------------------------------------------------
-      lat_id <- if(is.na(str_trim(unlist(strsplit(
+      lat_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
                     full_table[grep("@ Latitude?",
                     full_table,ignore.case = TRUE)], ":")))[2])){
         lat_id <- as.double(NA)
         }else{
-        lat_id <-str_trim(unlist(strsplit(full_table[grep("@ Latitude?",
-                          full_table,ignore.case = TRUE)], ":"))[2],
-                          side = "both")}
+        lat_id <-stringr::str_trim(unlist(stringr::strsplit(
+                                   full_table[grep("@ Latitude?", full_table,
+                                   ignore.case = TRUE)], ":"))[2],
+                                   side = "both")}
 
 # Get longitude ---------------------------------------------------------------
-      long_id <- if(is.na(str_trim(unlist(strsplit(
+      long_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
                     full_table[grep("@ Longitude?", full_table,
                     ignore.case = TRUE)], ":")))[2])){
         long_id <- as.double(NA)
       }else{
-        long_id <- str_trim(unlist(strsplit(full_table[grep("@ Longitude?",
-                            full_table,ignore.case = TRUE)],
-                            ":"))[2], side = "both")}
+        long_id <- stringr::str_trim(unlist(strsplit(
+                                     full_table[grep("@ Longitude?",
+                                     full_table,ignore.case = TRUE)],
+                                     ":"))[2], side = "both")}
 
 # Get the date ----------------------------------------------------------------
-      date_id <- if(is.na(str_trim(unlist(strsplit(
+      date_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
                     full_table[grep("@ Date?", full_table,ignore.case = TRUE)],
                     ":")))[2])){
         date_id <- as.character(NA) #If the date is missing subs an NA.
       }else{
-        date_id <- str_trim(unlist(strsplit(
+        date_id <- stringr::str_trim(unlist(stringr::strsplit(
                             full_table[grep("@ Date?", full_table,
                             ignore.case = TRUE)], ":"))[2], side = "both")}
 
 # Get the time ----------------------------------------------------------------
-      time_id <-  if(is.na(str_trim(unlist(strsplit(
+      time_id <-  if(is.na(stringr::str_trim(unlist(stringr::strsplit(
                     full_table[grep("@ Cast?", full_table,ignore.case = TRUE)],
                     ":")))[2])){
         time_id <- as.character(NA)
       }else{
         time_id <- strftime(as.POSIXct(paste(date_id,
-                            str_pad(str_trim(unlist(strsplit(
-                            full_table[grep("@ Cast?", full_table,
-                            ignore.case = TRUE)],":"))[2], side = "both"),
-                            width = 4, side = "left", pad = "0"), sep = "-"),
-                            format = "%d%b%y-%H%M", tz = "UTC"),
+                            stringr::str_pad(stringr::str_trim(unlist(
+                            stringr::strsplit(full_table[grep("@ Cast?",
+                            full_table, ignore.case = TRUE)],":"))[2],
+                            side = "both"), width = 4, side = "left", pad = "0"),
+                            sep = "-"), format = "%d%b%y-%H%M", tz = "UTC"),
                             format = "%H:%M:%S", tz = "UTC")}
 
 # Get the cruise name ---------------------------------------------------------
-      cruise_id <- if(is.na(str_trim(unlist(strsplit(
+      cruise_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
                       full_table[grep("@ Cruise?",
                       full_table,ignore.case = TRUE)], ":")))[2])){
         cruise_id <- as.character(NA)#If Cruise is missing subs an NA
       }else{
-        cruise_id <- toupper(str_trim(unlist(strsplit(
+        cruise_id <- toupper(stringr::str_trim(unlist(stringr::strsplit(
                              full_table[grep("@ Cruise?", full_table,
                              ignore.case = TRUE)], ":"))[2], side = "both"))}
 
 # Get the station name --------------------------------------------------------
       station_id_p <- if(length(full_table[grep("@ Station?",
                          full_table,ignore.case = TRUE)])!=0){
-        station_id_p <- str_trim(unlist(strsplit(
+        station_id_p <- stringr::str_trim(unlist(stringr::strsplit(
                                  full_table[grep("@ Station?",
                                  full_table,ignore.case = TRUE)],
                                  ":"))[2], side = "both")
@@ -130,7 +132,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
       haul_id_p <- if(length(full_table[grep("@ Haul?",
                       full_table, ignore.case = TRUE)]) != 0 ){
-        haul_id <- str_trim(unlist(strsplit(
+        haul_id <- stringr::str_trim(unlist(stringr::strsplit(
                             full_table[grep("@ Haul?", full_table,
                             ignore.case = TRUE)], ":"))[2], side = "both")
         }else{
@@ -140,16 +142,17 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       grid_id <- if(length(full_table[grep("@ Grid?",
                     full_table,ignore.case = TRUE)]) == 0){
         grid_id <- as.character(NA)
-      }else if (is.na(str_trim(unlist(strsplit(
+      }else if (is.na(stringr::str_trim(unlist(stringr::strsplit(
                 full_table[grep("@ Grid?", full_table,ignore.case = TRUE)],
                 ":")))[2])){
         grid_id <- as.character(NA)
-      }else if(str_detect(str_trim(unlist(strsplit(full_table[grep("@ Grid?",
-               full_table,ignore.case = TRUE)], ":"))[2], side = "both"),
-               "BON\\") == TRUE){
+      }else if(stringr::str_detect(stringr::str_trim(unlist(stringr::strsplit(
+               full_table[grep("@ Grid?", full_table,ignore.case = TRUE)],
+               ":"))[2], side = "both"), "BON\\") == TRUE){
         grid_id <- as.character(NA)
       }else {
-        grid_id <- toupper(str_trim(unlist(strsplit(full_table[grep("@ Grid?",
+        grid_id <- toupper(stringr::str_trim(unlist(stringr::strsplit(
+                           full_table[grep("@ Grid?",
                            full_table,ignore.case = TRUE)], ":"))[2],
                            side = "both"))}
 
@@ -157,8 +160,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       station_id <- if(is.na(suppressWarnings(
                        as.numeric(station_id_p))) == TRUE){
         station_id <- as.integer(NA)
-      }else if(str_detect(station_id_p,"[.]") == TRUE){
-        station_id <- unlist(strsplit(station_id_p,"[.]"))[1]
+      }else if(stringr::str_detect(station_id_p,"[.]") == TRUE){
+        station_id <- unlist(stringr::strsplit(station_id_p,"[.]"))[1]
       }else{
         station_id <- station_id_p
       }
@@ -173,8 +176,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Fixes station name if it is in station.haul format --------------------------
       haul_id <- if(is.na(haul_id_p) == TRUE &
                    !is.na(station_id_p) &
-                   str_detect(station_id_p, "[.]") == TRUE){
-        haul_id <- unlist(strsplit(station_id_p, "[.]"))[2]
+                   stringr::str_detect(station_id_p, "[.]") == TRUE){
+        haul_id <- unlist(stringr::strsplit(station_id_p, "[.]"))[2]
       }else if(is.na(haul_id_p) == TRUE){
         haul_id <- as.integer(NA)
       }else{
@@ -184,7 +187,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Get the depth ---------------------------------------------------------------
       depth_id <- if(length(full_table[grep("@ Water?", full_table,
                      ignore.case = TRUE)]) != 0 ){
-        depth_id <- str_trim(unlist(strsplit(
+        depth_id <- stringr::str_trim(unlist(stringr::strsplit(
                              full_table[grep("@ Water?", full_table,
                              ignore.case = TRUE)], ":"))[2], side = "both")
       }else{
@@ -193,7 +196,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Get instrument type ---------------------------------------------------------
       instrument_id <- if(length(full_table[grep("@ Instrument?", full_table,
                           ignore.case = TRUE)]) != 0){
-        instrument_id <- str_trim(unlist(strsplit(
+        instrument_id <- stringr::str_trim(unlist(stringr::strsplit(
                                   full_table[grep("@ Instrument??", full_table,
                                   ignore.case = TRUE)], ":"))[2], side = "both")
       }else{
@@ -201,11 +204,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       }
 
 # Reformat latitude and longitude to prep for conversion ----------------------
-      lat_id <- paste(unlist(strsplit(lat_id, " "))[1],
-                      unlist(strsplit(lat_id, " "))[2], sep = " ")
+      lat_id <- paste(unlist(stringr::strsplit(lat_id, " "))[1],
+                      unlist(stringr::strsplit(lat_id, " "))[2], sep = " ")
 
-      long_id <- paste(unlist(strsplit(long_id, " "))[1],
-                       unlist(strsplit(long_id, " "))[2], sep = " ")
+      long_id <- paste(unlist(stringr::strsplit(long_id, " "))[1],
+                       unlist(stringr::strsplit(long_id, " "))[2], sep = " ")
     }
 
 # Get columnar data -----------------------------------------------------------
@@ -289,7 +292,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Gets all data column names --------------------------------------------------
             for(n in 1:col_length){
 
-            name0 <- unlist(strsplit(
+            name0 <- unlist(stringr::strsplit(
                             full_table[grep(paste("# name",col_nums[n],
                             sep = " "), full_table, ignore.case = TRUE)],
                             "= "))[2]
@@ -310,24 +313,24 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       bongo_data <- if(nrow(bongo_table) != 0 & press_only == TRUE){
 
         bongo_data <- bongo_table %>%
-          mutate(PRESSURE = as.double(PRESSURE))%>%
-          mutate(TEMPERATURE1 = as.double(TEMPERATURE1))%>%
-          mutate(CONDUCTIVITY1 = as.double(CONDUCTIVITY1))%>%
-          mutate(SALINITY1 = as.double(SALINITY1))%>%
-          mutate(SIGMA_T = as.double(SIGMA_T))%>%
-          mutate(FLAG = as.character(FLAG))
+          dplyr::mutate(PRESSURE = as.double(PRESSURE),
+                        TEMPERATURE1 = as.double(TEMPERATURE1),
+                        CONDUCTIVITY1 = as.double(CONDUCTIVITY1),
+                        SALINITY1 = as.double(SALINITY1),
+                        SIGMA_T = as.double(SIGMA_T),
+                        FLAG = as.character(FLAG))
 
 # Handles if only depth is present so no conversion ---------------------------
       }else if (nrow(bongo_table) != 0 & dep_only == TRUE &
                 press_only == FALSE){
 
         bongo_data <- bongo_table %>%
-          mutate(PRESSURE = as.double(depth))%>%
-          mutate(TEMPERATURE1 = as.double(TEMPERATURE1))%>%
-          mutate(CONDUCTIVITY1 = as.double(CONDUCTIVITY1))%>%
-          mutate(SALINITY1 = as.double(SALINITY1))%>%
-          mutate(SIGMA_T = as.double(SIGMA_T))%>%
-          mutate(FLAG = as.character(FLAG))
+          dplyr::mutate(PRESSURE = as.double(depth),
+                        TEMPERATURE1 = as.double(TEMPERATURE1),
+                        CONDUCTIVITY1 = as.double(CONDUCTIVITY1),
+                        SALINITY1 = as.double(SALINITY1),
+                        SIGMA_T = as.double(SIGMA_T),
+                        FLAG = as.character(FLAG))
 
       }else{
 
@@ -347,21 +350,21 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
 # Formats bongo data ----------------------------------------------------------
     bongo_data <- bongo_data %>%
-      mutate(LAT = lat_id)%>%
-      mutate(LAT = as.numeric(conv_unit(LAT,
-                              from = 'deg_dec_min', to = 'dec_deg')))%>%
-      mutate(LON = long_id)%>%
-      mutate(LON = -1*(as.numeric(conv_unit(LON,
-                                  from = 'deg_dec_min', to = 'dec_deg'))))%>%
-      mutate(DATE = as.POSIXct(date_id,format = "%d%b%y", tz = "UTC"))%>%
-      mutate(TIME = time_id)%>%
-      mutate(CRUISE = cruise_id)%>%
-      mutate(STATION_NAME = as.character(station_id))%>%
-      mutate(HAUL_NAME = as.integer(haul_id))%>%
-      mutate(DIRECTORY =  as.character(temp[i]))%>%
-      mutate(FOCI_GRID = as.character(grid_id))%>%
-      mutate(DEPTH_BOTTOM = suppressWarnings(as.integer(depth_id)))%>%
-      mutate(INSTRUMENT = as.character(instrument_id))
+      dplyr::mutate(LAT = lat_id,
+                    LAT = as.numeric(measurements::conv_unit(LAT,
+                              from = 'deg_dec_min', to = 'dec_deg')),
+                    LON = long_id,
+                    LON = -1*(as.numeric(measurements::conv_unit(LON,
+                                  from = 'deg_dec_min', to = 'dec_deg'))),
+                    DATE = as.POSIXct(date_id,format = "%d%b%y", tz = "UTC"),
+                    TIME = time_id,
+                    CRUISE = cruise_id,
+                    STATION_NAME = as.character(station_id),
+                    HAUL_NAME = as.integer(haul_id),
+                    DIRECTORY =  as.character(temp[i]),
+                    FOCI_GRID = as.character(grid_id),
+                    DEPTH_BOTTOM = suppressWarnings(as.integer(depth_id)),
+                    INSTRUMENT = as.character(instrument_id))
 
 
 
@@ -369,7 +372,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                    dep_only == TRUE &
                    press_only == FALSE){
 
-      bongo_data <- bongo_data %>% mutate(DEPTH = as.integer(PRESSURE))
+      bongo_data <- bongo_data %>% dplyr::mutate(DEPTH = as.integer(PRESSURE))
 
     }else if (nrow(bongo_table) > 1 &
               dep_only == FALSE &
@@ -378,7 +381,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 #Depth calaculated using AN69:Conversion of Pressure to Depth,
 #requires Decimal degrees.
 #http://www.seabird.com/document/an69-conversion-pressure-depth
-      bongo_data <- bongo_data %>% mutate(DEPTH = as.integer((((((-1.82e-15  *
+      bongo_data <- bongo_data %>% dplyr::mutate(
+                                          DEPTH = as.integer((((((-1.82e-15  *
                                           PRESSURE + 2.279e-10 ) * PRESSURE -
                                           2.2512e-5 ) * PRESSURE + 9.72659) *
                                           PRESSURE) / (9.780318 *
@@ -387,7 +391,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                           sin(LAT/57.29578)^2)) +
                                           1.092e-6 * PRESSURE)))
     }else{
-      bongo_data <- bongo_data %>% mutate(DEPTH = as.integer(NA))
+      bongo_data <- bongo_data %>% dplyr::mutate(DEPTH = as.integer(NA))
     }
 
 
@@ -400,9 +404,9 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                                CONDUCTIVITY1, SIGMA_T,
                                                INSTRUMENT, DIRECTORY)%>%
 # Filters out bad temperatures ------------------------------------------------
-                  filter(TEMPERATURE1 >= -3 & TEMPERATURE1 <= 20)%>%
+                  dplyr::filter(TEMPERATURE1 >= -3 & TEMPERATURE1 <= 20)%>%
 # Filters out bad salinities --------------------------------------------------
-                  filter(SALINITY1 >= 0.05  & SALINITY1 <= 38)
+                  dplyr::filter(SALINITY1 >= 0.05  & SALINITY1 <= 38)
 
 
 # Appends finished files to cruise list ---------------------------------------
@@ -418,19 +422,19 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
 # Make a single file of all cruise data ---------------------------------------
   cruise_data_all <- as.data.frame(dplyr::bind_rows(cruise_data))%>%
-    mutate(CONDUCTIVITY2 = as.double(NA))%>%
-    mutate(FLOUROMETER = as.double(NA))%>%
-    mutate(OXYGEN1 = as.double(NA))%>%
-    mutate(OXYGEN2 = as.double(NA))%>%
-    mutate(PAR = as.double(NA))%>%
-    mutate(PH = as.double(NA))%>%
-    mutate(POTENTIAL_DENSITY = as.double(NA))%>%
-    mutate(SALINITY2 = as.double(NA))%>%
-    mutate(TEMPERATURE2 = as.double(NA))%>%
-    mutate(TRANS = as.double(NA))%>%
-    mutate(COMMENTS_SEACAT_CTD = as.character(NA))%>%
-    mutate(GEAR_NAME = as.character("CAT"))%>%
-    mutate(NET = as.integer(0))
+    dplyr::mutate(CONDUCTIVITY2 = as.double(NA),
+                  FLOUROMETER = as.double(NA),
+                  OXYGEN1 = as.double(NA),
+                  OXYGEN2 = as.double(NA),
+                  PAR = as.double(NA),
+                  PH = as.double(NA),
+                  POTENTIAL_DENSITY = as.double(NA),
+                  SALINITY2 = as.double(NA),
+                  TEMPERATURE2 = as.double(NA),
+                  TRANS = as.double(NA),
+                  COMMENTS_SEACAT_CTD = as.character(NA),
+                  GEAR_NAME = as.character("CAT"),
+                  NET = as.integer(0))
 
 
 # Make cruise summary and summary stats text ----------------------------------
@@ -530,7 +534,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   file_name <- paste(cruise_id, "_forEcoDATT", sep = "", ".csv")
 
 # Writes files to folder ------------------------------------------------------
-  write_csv(cruise_data_all, file.path(current_path, file_name))
+  readr::write_csv(cruise_data_all, file.path(current_path, file_name))
   write.table(problem_files, file = paste(current_path, paste(cruise_id,
                                           "warnings.txt", sep = "_")
                                          , sep = "/"), eol = "\n\n")
