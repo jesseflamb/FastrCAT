@@ -45,7 +45,7 @@ done, the following R code should install the package
 ``` r
 library(devtools)
 
-creds = git2r::cred_ssh_key("C:\\Users\\MYSELF\\.ssh\\id_rsa.pub",
+creds <- git2r::cred_ssh_key("C:\\Users\\MYSELF\\.ssh\\id_rsa.pub",
                             "C:\\Users\\MYSELF\\.ssh\\id_rsa")
 
 devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
