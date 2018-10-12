@@ -51,7 +51,7 @@ creds <- cred_ssh_key(publickey = ssh_path("id_rsa.pub"),
                              privatekey = ssh_path("id_rsa"),
                              passphrase = character(0))
 
-devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
-                      credentials = creds)
+install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
+                             credentials = creds)
 ```
 
