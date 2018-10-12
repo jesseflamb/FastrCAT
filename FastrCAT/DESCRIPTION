@@ -14,6 +14,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: dplyr (>= 0.7.6),
          ggplot2 (>= 3.0.0),
+         grDevices (>= 3.5.1),
          lubridate (>= 1.7.4),
          magrittr (>= 1.5),
          measurements (>= 1.2.0),
@@ -24,5 +25,6 @@ BugReports: https://gitlab.afsc.noaa.gov/Nissa.Ferm/FastrCAT/issues
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
