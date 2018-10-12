@@ -6,8 +6,9 @@
 #' in the plot folder within the current folder. It only needs to be run
 #' once to generate a plot for each station. Each dot is a data point.
 #' Check the profile for each station/haul.
-#' @param current_path The path to directory where all .up files
-#' are located for a cruise.
+#' @param current_path The path to directory where dataframe created from
+#' make_dataframe_fc() is located.
+#' @inheritParams make_dataframe_fc()
 #' @return A plot of temperature and salinity by depth for each
 #' station of a cruise. Plots are written in the plot folder and
 #' are in the .png format.
@@ -18,11 +19,14 @@
 plot_ts_fc <- function(current_path){
 
 
+# Find file -------------------------------------------------------------------
 
   to_datadframe <- list.files(path = current_path, pattern = "\\EcoDATT.csv$",
                               ignore.case = TRUE,
                               include.dirs = TRUE, full.names = TRUE)
 
+
+# Load data -------------------------------------------------------------------
 
   fc_dataframe <- readr::read_csv(to_datadframe,
                                   col_types = cols(CRUISE = col_character(),
@@ -38,12 +42,18 @@ plot_ts_fc <- function(current_path){
                                  remove = FALSE)%>%
                     tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))
 
+# Determine Station or Foci grid unique indentifiers --------------------------
+
   unique_stations_one <- unique(fc_dataframe$Station_haul)
   unique_foci_grid <- unique(fc_dataframe$FOCI_GRID)
   cruise_name <- unique(fc_dataframe$CRUISE)
 
+# Define plot colors ----------------------------------------------------------
+
   plot_colors <- c("#1565C0","#b92b27")
   names(plot_colors) <- c("SALINITY1", "TEMPERATURE1")
+
+# Determine use of Station or Foci grid ---------------------------------------
 
   unique_stations <- if(length(unique_stations_one) < 2){
     unique_stations <- unique_foci_grid
@@ -51,11 +61,16 @@ plot_ts_fc <- function(current_path){
     unique_stations <- unique_stations_one
     }
 
+# Plot each station/foci grid -------------------------------------------------
 
   for(i in 1:length(unique_stations)){
 
+# Make unique file name -------------------------------------------------------
+
   name_ts_plot <- paste(current_path,"/plots/",cruise_name, "_Station_",
                         unique_stations[i], ".png",sep = "")
+
+# Make plot name (station or foci grid) ---------------------------------------
 
   plot_title <- if(length(unique_stations_one) < 2){
       plot_title <- paste("Cruise ",cruise_name,"\nFOCI GRID ",
@@ -66,6 +81,7 @@ plot_ts_fc <- function(current_path){
                                       "_", " Haul "), sep = "")
     }
 
+# Determine filter for unique station/ foci grid ------------------------------
 
   filtered_data <- if(length(unique_stations_one) < 2){
       filtered_data <- fc_dataframe %>%
@@ -75,6 +91,7 @@ plot_ts_fc <- function(current_path){
         dplyr::filter(Station_haul == unique_stations[i])
     }
 
+# Make pretty plot breaks for depth -------------------------------------------
 
   depth_breaks <- if(max(filtered_data$DEPTH, na.rm = TRUE) >= 200){
      depth_breaks <- seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 , by = 50)
@@ -86,14 +103,18 @@ plot_ts_fc <- function(current_path){
    }
 
   depth_labels <- if(max(filtered_data$DEPTH, na.rm = TRUE) >= 200){
-    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 , by = 50))
+    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
+                            by = 50))
   } else if(max(filtered_data$DEPTH, na.rm = TRUE) > 100 &
             max(filtered_data$DEPTH, na.rm = TRUE) < 200) {
-    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 , by = 20))
+    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
+                            by = 20))
   } else {
-    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 , by = 4))
+    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
+                            by = 4))
   }
 
+# Plot data --------------------------------------------------------------------
 
   ts_plot <- ggplot2::ggplot(data = filtered_data)+
     ggplot2::geom_path(aes(MEASURMENT, -(DEPTH), color = TYPE), size = 2,
@@ -116,12 +137,15 @@ plot_ts_fc <- function(current_path){
     ggplot2::ylab(label = "Depth [m]")+
     ggplot2::xlab(label = expression(bold(paste("Salinity[PSU]",
                                        "\t\t\t\t\t\t\t\t\t\t\t",
-                                       paste("Temperature", "["~degree~C, "]"))))) +
+                                       paste("Temperature",
+                                             "["~degree~C, "]"))))) +
     ggplot2::ggtitle(label = plot_title)+
     ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
 
-  grDevices::png(filename = name_ts_plot, width = 500, height = 600, units = "px",
-      bg = "transparent")
+# Write plot to file ----------------------------------------------------------
+
+  grDevices::png(filename = name_ts_plot, width = 500, height = 600,
+                 units = "px", bg = "transparent")
 
   print(ts_plot)
 
