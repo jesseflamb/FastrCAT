@@ -7,8 +7,8 @@
 plot_ts_fc(current_path)
 }
 \arguments{
-\item{current_path}{The path to directory where all .up files
-are located for a cruise.}
+\item{current_path}{The path to directory where dataframe created from
+make_dataframe_fc() is located.}
 }
 \value{
 A plot of temperature and salinity by depth for each
