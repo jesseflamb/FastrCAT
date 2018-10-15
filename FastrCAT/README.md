@@ -28,31 +28,56 @@ documentation
 
 Full documentation of the process is available in vignettes
 
-install the package
--------------------
+How to install the package
+--------------------------
 
 There are two options for installing the package.
 
 1.  download/clone the project from GitLab and then install to R from
     source
-2.  install with the `devtools` package
+2.  install with the `devtools`, `git2r`, and, `getPass` packages
 
-### install via `devtools`
+### download/clone
 
-You’ll need to setup ssh on GitLab and add your ssh key. Once that’s
-done, the following R code should install the package
+Download the package as a zip.
+
+``` r
+pkg_location <- "path/to/directory/where/zipfile/is/located"
+
+install.packages("FastrCAT.zip", lib = pkg_location, repos = NULL)
+```
+
+After you have installed it this way, you can use
+
+``` r
+library(FastrCAT)
+```
+
+to load the library .
+
+### install directly from GitLab
+
+After you have setup your ssh on GitLab and added you ssh key. Copy and
+paste the code below to intall the `FastrCAT` package.
+
+The package `git2r` creates the ssh credential path to tell GitLab you
+are allowed to access the repository. The package `getPass` creates the
+pop up prompt for you to enter your LDAP password. Both of these are
+needed to access the package.
+
+``` r
+library(git2r)
+library(getPass)
+
+creds <- git2r::cred_ssh_key(publickey = ssh_path("id_rsa.pub"),
+                             privatekey = ssh_path("id_rsa"),
+                             passphrase = character(0))
+```
+
+The package `devtools` is needed install the `FastrCAT` package.
 
 ``` r
 library(devtools)
-
-creds <- git2r::cred_ssh_key("C:\\Users\\MYSELF\\.ssh\\id_rsa.pub",
-                            "C:\\Users\\MYSELF\\.ssh\\id_rsa")
-
-devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
+devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT/FastrCAT.git",
                       credentials = creds)
 ```
-
-MYSELF is your named folder in your home directory. When you have set up
-your ssh key using GitLab there will be a .ssh folder in your named
-folder. You can copy/paste the code above just change the MYSELF to the
-name of your named folder.
