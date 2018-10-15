@@ -26,5 +26,6 @@ RoxygenNote: 6.1.0
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    htmltools
 VignetteBuilder: knitr
