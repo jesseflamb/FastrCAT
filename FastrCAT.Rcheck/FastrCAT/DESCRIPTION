@@ -21,4 +21,4 @@ Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 NeedsCompilation: no
 Packaged: 2018-10-15 17:29:17 UTC; nissa.ferm
-Built: R 3.5.1; ; 2018-10-15 17:29:25 UTC; windows
+Built: R 3.5.1; ; 2018-10-15 19:04:43 UTC; windows
