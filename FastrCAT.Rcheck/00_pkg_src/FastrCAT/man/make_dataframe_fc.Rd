@@ -10,9 +10,9 @@ make_dataframe_fc(current_path, GE = FALSE)
 \item{current_path}{The path to directory where all .up files
 are located for a cruise.}
 
-\item{GE}{Returns the dataframe to the global R environment. By defulaut it
-is set to FALSE. Set to TRUE if you would like the data available in the
-global environment.}
+\item{GE}{A logical value, Returns the dataframe to the global R environment.
+By defulaut it is set to FALSE. Set to TRUE if you would like the data
+available in the global environment.}
 }
 \value{
 .csv file of all .up files. A .txt file of warnings and one

@@ -1,0 +1,124 @@
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `FastrCAT'}}
+\par\bigskip{\large \today}
+\end{center}
+\begin{description}
+\raggedright{}
+\inputencoding{utf8}
+\item[Type]\AsIs{Package}
+\item[Title]\AsIs{Analysis of Oceanographic Data from FastCATs}
+\item[Version]\AsIs{0.0.0.9000}
+\item[Author]\AsIs{person(given = ``Nissa'', family = ``Ferm'', email = ``nissa.ferm@noaa.gov'',
+role = c(``aut'',``cre''))}
+\item[Maintainer]\AsIs{Nissa Ferm }\email{nissa.ferm@noaa.gov}\AsIs{}
+\item[Description]\AsIs{Complies data from .up files and converts them into a single dataframe.
+Provides feedback to trouble shoot data quality issues from FastCat generated data. Produces
+depth by temperature and salinity plots, maps of ...}
+\item[Depends]\AsIs{R (>= 3.5.1)}
+\item[License]\AsIs{CC0}
+\item[Encoding]\AsIs{UTF-8}
+\item[LazyData]\AsIs{true}
+\item[Imports]\AsIs{dplyr (>= 0.7.6),
+ggplot2 (>= 3.0.0),
+grDevices (>= 3.5.1),
+lubridate (>= 1.7.4),
+magrittr (>= 1.5),
+measurements (>= 1.2.0),
+readr (>= 1.1.1),
+stringr (>= 1.3.1),
+tidyr (>= 0.8.1)}
+\item[BugReports]\AsIs{}\url{https://gitlab.afsc.noaa.gov/Nissa.Ferm/FastrCAT/issues}\AsIs{}
+\item[RoxygenNote]\AsIs{6.1.0}
+\item[Suggests]\AsIs{knitr,
+rmarkdown,
+testthat,
+htmltools}
+\item[VignetteBuilder]\AsIs{knitr}
+\end{description}
+\Rdcontents{\R{} topics documented:}
+\inputencoding{utf8}
+\HeaderA{FastrCAT}{FastrCAT: A package for the Analysis of Oceanographic data from FastCATs.}{FastrCAT}
+\aliasA{FastrCAT-package}{FastrCAT}{FastrCAT.Rdash.package}
+%
+\begin{Description}\relax
+This package makes it easy to use temperature and salinity data collected
+by a SeaBrid FastCAT. The package provides functions to read in .up files
+and bind them into a single dataframe, provide QA/QC feedback, plot depth
+by temperature/salinity for each cast, and maps of these... indicies.
+\end{Description}
+\inputencoding{utf8}
+\HeaderA{make\_dataframe\_fc}{Create a Dataframe from .up files}{make.Rul.dataframe.Rul.fc}
+%
+\begin{Description}\relax
+This function writes a single data frame in .csv format to file
+containing oceanographic data collected by the FastCat during a cruise.
+The format and column naming conventions are specific to the needs of EcoDAAT.
+This is the primary function of the FastrCAT package and must be run prior to
+all other functions. All other functions depend on the data frame generated.
+Other outputs of the function are two text files. This first is a cruise
+summary.The summary contains basic information about the data and some summary
+statistics.The second is a warnings file, which tells users if data or
+information is missing incase reprocessing is necessary.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+make_dataframe_fc(current_path, GE = FALSE)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{current\_path}] The path to directory where all .up files
+are located for a cruise.
+
+\item[\code{GE}] A logical value, Returns the dataframe to the global R environment.
+By defulaut it is set to FALSE. Set to TRUE if you would like the data
+available in the global environment.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+.csv file of all .up files. A .txt file of warnings and one
+of summary statistics.
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{plot\_ts\_fc}{Temperature/Salinity by Depth Plots}{plot.Rul.ts.Rul.fc}
+%
+\begin{Description}\relax
+Once make\_dataframe\_fc has been run, then plot\_ts\_fc
+can be used. This function creates a depth by salinity and temperature
+plot for each station. These are all .png files which will be located
+in the plot folder within the current folder. It only needs to be run
+once to generate a plot for each station. Each dot is a data point.
+Check the profile for each station/haul.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+plot_ts_fc(current_path)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{current\_path}] The path to directory where dataframe created from
+make\_dataframe\_fc() is located.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A plot of temperature and salinity by depth for each
+station of a cruise. Plots are written in the plot folder and
+are in the .png format.
+\end{Value}
+\printindex{}
+\end{document}

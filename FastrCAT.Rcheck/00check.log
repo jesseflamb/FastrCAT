@@ -12,7 +12,11 @@
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
-* checking for hidden files and directories ... OK
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  .Rd2pdf5312
+These were most likely included in error. See section 'Package
+structure' in the 'Writing R Extensions' manual.
 * checking for portable file names ... OK
 * checking whether package 'FastrCAT' can be installed ... OK
 * checking installed package size ... OK
@@ -25,7 +29,10 @@ Non-standard file/directory found at top level:
   'README.Rmd'
 * checking for left-over files ... OK
 * checking index information ... OK
-* checking package subdirectories ... OK
+* checking package subdirectories ... WARNING
+Found the following directory with the name of a Rd2pdf directory:
+  ./.Rd2pdf5312
+Most likely, these were included erroneously.
 * checking R files for non-ASCII characters ... OK
 * checking R files for syntax errors ... OK
 * checking whether the package can be loaded ... OK
@@ -110,7 +117,7 @@ to your NAMESPACE file.
 * checking Rd line widths ... OK
 * checking Rd cross-references ... WARNING
 Error in find.package(package, lib.loc) : 
-  there is no package called 'MASS'
+  there is no package called 'rpart'
 Calls: <Anonymous> -> lapply -> FUN -> find.package
 Execution halted
 * checking for missing documentation entries ... OK
@@ -121,19 +128,8 @@ Execution halted
 * checking installed files from 'inst/doc' ... OK
 * checking files in 'vignettes' ... OK
 * checking examples ... NONE
-* checking for unstated dependencies in 'tests' ... OK
-* checking tests ... ERROR
-  Running 'testthat.R'
-Running the tests in 'tests/testthat.R' failed.
-Complete output:
-  > library(testthat)
-  > library(FastrCAT)
-  > 
-  > test_check("FastrCAT")
-  Error: No tests found for FastrCAT
-  Execution halted
 * checking for unstated dependencies in vignettes ... OK
 * checking package vignettes in 'inst/doc' ... OK
 * checking re-building of vignette outputs ... OK
 * DONE
-Status: 1 ERROR, 2 WARNINGs, 3 NOTEs
+Status: 3 WARNINGs, 4 NOTEs

@@ -79,5 +79,6 @@ The package `devtools` is needed install the `FastrCAT` package.
 ``` r
 library(devtools)
 devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT/FastrCAT.git",
+                      build_vignettes = TRUE,
                       credentials = creds)
 ```
