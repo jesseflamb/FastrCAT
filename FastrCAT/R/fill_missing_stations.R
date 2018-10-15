@@ -1,7 +1,7 @@
 #' @title Fill in missing station, foci grid, and haul names
 #'
 #' @description Takes the .csv file created with make_dataframe_fc() and
-#' a haul records queried from EcoDAAT and finds and replaces missing
+#' haul records queried from EcoDAAT and finds and replaces missing
 #' station names, foci grid names, and haul numbers in the dataframe.
 #' @param path_fc The path to the directory where the .csv file
 #' generated from make_dataframe_fc() is located.

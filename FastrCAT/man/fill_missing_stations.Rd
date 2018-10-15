@@ -19,6 +19,6 @@ hauls names have been corrected.
 }
 \description{
 Takes the .csv file created with make_dataframe_fc() and
-a haul records queried from EcoDAAT and finds and replaces missing
+haul records queried from EcoDAAT and finds and replaces missing
 station names, foci grid names, and haul numbers in the dataframe.
 }
