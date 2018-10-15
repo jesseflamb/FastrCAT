@@ -44,15 +44,14 @@ done, the following R code should install the package
 
 ``` r
 library(devtools)
+library(git2r)
+library(getPass)
 
-creds <- git2r::cred_ssh_key("C:\\Users\\MYSELF\\.ssh\\id_rsa.pub",
-                            "C:\\Users\\MYSELF\\.ssh\\id_rsa")
+creds <- cred_ssh_key(publickey = ssh_path("id_rsa.pub"),
+                             privatekey = ssh_path("id_rsa"),
+                             passphrase = character(0))
 
-devtools::install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
-                      credentials = creds)
+install_git("git@gitlab.afsc.noaa.gov:Nissa.Ferm/FastrCAT.git",
+                             credentials = creds)
 ```
 
-MYSELF is your named folder in your home directory. When you have set up
-your ssh key using GitLab there will be a .ssh folder in your named
-folder. You can copy/paste the code above just change the MYSELF to the
-name of your named folder.
