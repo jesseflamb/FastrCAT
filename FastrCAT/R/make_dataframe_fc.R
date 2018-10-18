@@ -394,9 +394,36 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       bongo_data <- bongo_data %>% dplyr::mutate(DEPTH = as.integer(NA))
     }
 
-#Find which rows have bad
+# Find which casts have bad salinities ----------------------------------------
+
+    bad_salinity <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
+                                                 HAUL_NAME,
+                                                 FOCI_GRID, SALINITY1)%>%
+      dplyr::filter(SALINITY1 < 0.05  & SALINITY1 > 38)%>%
+      dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
+      dplyr::summarise(Min_value = ifelse(min(SALINITY1, na.rm = TRUE) < 0.05,
+                                          min(SALINITY1, na.rm = TRUE), NA),
+                       Max_value = ifelse(max(SALINITY1, na.rm = TRUE) > 38,
+                                          max(SALINITY1, na.rm = TRUE), NA))%>%
+      dplyr::mutate(ERROR_TYPE = "Salinity")
 
 
+# Find which casts have bad temperature ----------------------------------------
+
+    bad_temperature <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
+                                                    HAUL_NAME,
+                                                    FOCI_GRID, TEMPERATURE1)%>%
+      dplyr::filter(TEMPERATURE1 < -3 & TEMPERATURE1 > 20)%>%
+      dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
+      dplyr::summarise(Min_value = ifelse(min(TEMPERATURE1, na.rm = TRUE) < -3,
+                                          min(TEMPERATURE1, na.rm = TRUE), NA),
+                       Max_value = ifelse(max(TEMPERATURE1, na.rm = TRUE) > 20,
+                                          max(TEMPERATURE1, na.rm = TRUE), NA))%>%
+      dplyr::mutate(ERROR_TYPE = "Temperature")
+
+# Bind together bad salinity and temperature for error table ------------------
+
+    bad_sal_temp <- bad_temperature %>% dplyr::bind_rows(bad_salinity)
 
 # Rearrange columns for EcoDAAT format ----------------------------------------
     bongo_data <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME, HAUL_NAME,
