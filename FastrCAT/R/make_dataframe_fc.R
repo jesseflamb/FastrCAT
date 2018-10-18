@@ -394,9 +394,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       bongo_data <- bongo_data %>% dplyr::mutate(DEPTH = as.integer(NA))
     }
 
+#Find which rows have bad
 
 
-# Rearrange columns for EcoDATT format ----------------------------------------
+
+# Rearrange columns for EcoDAAT format ----------------------------------------
     bongo_data <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME, HAUL_NAME,
                                                FOCI_GRID, DATE, TIME, LAT, LON,
                                                DEPTH_BOTTOM, DEPTH,PRESSURE,
@@ -531,7 +533,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   }
 
 # Makes the file name ---------------------------------------------------------
-  file_name <- paste(cruise_id, "_forEcoDATT", sep = "", ".csv")
+  file_name <- paste(cruise_id, "_forEcoDAAT", sep = "", ".csv")
 
 # Writes files to folder ------------------------------------------------------
   readr::write_csv(cruise_data_all, file.path(current_path, file_name))
