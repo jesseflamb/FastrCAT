@@ -148,7 +148,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
         grid_id <- as.character(NA)
       }else if(stringr::str_detect(stringr::str_trim(unlist(strsplit(
                full_table[grep("@ Grid?", full_table,ignore.case = TRUE)],
-               ":"))[2], side = "both"), "BON\\") == TRUE){
+               ":"))[2], side = "both"), "BON") == TRUE){
         grid_id <- as.character(NA)
       }else {
         grid_id <- toupper(stringr::str_trim(unlist(strsplit(
@@ -577,7 +577,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                         sep = "/"))
 
 # Changes date to character to avoid Excel date-time errors--------------------
-  cruise_data_all$DATE %<>% as.character()
+  cruise_data_all$DATE <- as.character(cruise_data_all$DATE)
 
 # Data to the global environment ----------------------------------------------
   if(GE == TRUE){
