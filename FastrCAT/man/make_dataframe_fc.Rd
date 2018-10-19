@@ -15,8 +15,8 @@ By defulaut it is set to FALSE. Set to TRUE if you would like the data
 available in the global environment.}
 }
 \value{
-.csv file of all .up files. A .txt file of warnings and one
-of summary statistics.
+.csv file of all .up file data. An .html file with a cruise
+summary and data QAQC output.
 }
 \description{
 This function writes a single data frame in .csv format to file
