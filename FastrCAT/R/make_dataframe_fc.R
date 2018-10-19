@@ -530,12 +530,19 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                                   SALINITY1, DIRECTORY)%>%
     tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
                  remove = FALSE)%>%
-    tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))
+    tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
+    group_by(DEPTH,TYPE)%>%
+    summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
+              MAX = max(MEASURMENT, na.rm = TRUE),
+              MIN = min(MEASURMENT, na.rm = TRUE))
 
   ts_plot <- ggplot2::ggplot(data = plot_data)+
-    ggplot2::geom_smooth(aes(MEASURMENT, -(DEPTH), color = TYPE,
-                             fill = TYPE), size = 2, method = "loess",
-                             se = TRUE, alpha = 0.6)+
+    #ggplot2::geom_line(aes(MAX, -(DEPTH),color = TYPE),
+                      # alpha = 0.5)+
+   # ggplot2::geom_line(aes(MIN, -(DEPTH),color = TYPE),
+                       #alpha = 0.5)+
+    ggplot2::geom_line(aes(MEAN, -(DEPTH), color = TYPE),
+                             size = 2,alpha = 0.6)+
     #ggplot2::scale_y_continuous(breaks = depth_breaks,
      #                           labels = depth_labels)+
     ggplot2::scale_color_manual(values = plot_colors)+
