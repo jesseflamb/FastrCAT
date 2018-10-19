@@ -491,10 +491,19 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
   haul_name_check <- unique(cruise_data_all$HAUL_NAME)
 
-  time_range_check <- range(cruise_data_all$DATE, na.rm = TRUE)
+  start_month <- lubridate::month(min(
+    lubridate::month(cruise_data_all$DATE),
+    na.rm = TRUE), label = TRUE, abbr = FALSE)
 
-  temp_range_check <- round(range(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
-                            digits = 2)
+  start_day <- lubridate::day(min(cruise_data_all$DATE, na.rm = TRUE))
+
+  end_month <- lubridate::month(max(
+    lubridate::month(cruise_data_all$DATE),
+    na.rm = TRUE), label = TRUE, abbr = FALSE)
+
+  end_day <- lubridate::day(max(cruise_data_all$DATE, na.rm = TRUE))
+
+  year <- lubridate::year(max(cruise_data_all$DATE, na.rm = TRUE))
 
   temp_mean <- round(mean(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
                      digits = 2)
@@ -523,8 +532,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     '### Quick Cruise FastCAT Summary',
     '',
     'During the cruise `r cruise_name_check[1]` there were `r tows` tows with',
-    'depth, temperature, and salinity collected. Tows were taken during the',
-    'time period from `r time_range_check[1]` to `r time_range_check[2]`.',
+    'depth, temperature, and salinity collected. Tows were taken ',
+    'from `r start_month` `r start_day` to `r end_month` `r end_day` of `r year`.',
     'Temperature ranged from `r temp_range_check[1]` to `r temp_range_check[2]`',
     'with a mean of `r temp_mean` Celcius. Salinity ranged from `r sal_range_check[1]`',
     'to `r sal_range_check[2]` with a mean of `r sal_mean` PSU. The deepest',
@@ -548,6 +557,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'They have been filtered out of the data, because they are outside the',
     'know ranges for salinity and temperature. NA\'s refer to no outlier',
     'values found either below the minimum cutoff or above the maximum cutoff.',
+    'If there is no data below, then all readings were within known ranges.',
     '```{r,echo = FALSE}',
     'print(bad_sal_temp)',
     '```',
@@ -566,6 +576,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'Below are files which were identified as having no data. Make sure that this',
     'is true. Since all casts are processed by the perl script and the',
     'make_dataframe_fc() regardless if they were Good, Questionable, or "Failure.',
+    'If there is not a dataframe below then all files contained data.',
     '```{r, echo = FALSE}',
     'print(no_data_files)',
     '```')
