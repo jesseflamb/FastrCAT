@@ -482,7 +482,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       tows <- length(how_many_tows)
     }
 
-# Create variables for summary text -------------------------------------------
+# Create variables for cruise summary text ------------------------------------
   cruise_name_check <- unique(cruise_data_all$CRUISE)
 
   station_name_num <- length(unique(cruise_data_all$STATION_NAME))
@@ -521,6 +521,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   lon_range_check <- round(range(cruise_data_all$LON, na.rm = TRUE),
                            digits = 3)
 
+# Cruise Summary, in Rmarkdown format -----------------------------------------
   cruise_report <- c(
     '---',
     'title: "Cruise Report for `r cruise_name_check[1]` " ',
