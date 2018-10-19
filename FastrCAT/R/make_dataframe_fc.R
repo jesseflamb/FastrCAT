@@ -399,7 +399,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     bad_salinity <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
                                                  HAUL_NAME,
                                                  FOCI_GRID, SALINITY1)%>%
-      dplyr::filter(SALINITY1 < 0.05  & SALINITY1 > 38)%>%
+      dplyr::filter(SALINITY1 < 0.05 | SALINITY1 > 38)%>%
       dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
       dplyr::summarise(Min_value = ifelse(min(SALINITY1, na.rm = TRUE) < 0.05,
                                           min(SALINITY1, na.rm = TRUE), NA),
@@ -413,7 +413,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     bad_temperature <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
                                                     HAUL_NAME,
                                                     FOCI_GRID, TEMPERATURE1)%>%
-      dplyr::filter(TEMPERATURE1 < -3 & TEMPERATURE1 > 20)%>%
+      dplyr::filter(TEMPERATURE1 < -3 | TEMPERATURE1 > 20)%>%
       dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
       dplyr::summarise(Min_value = ifelse(min(TEMPERATURE1, na.rm = TRUE) < -3,
                                           min(TEMPERATURE1, na.rm = TRUE), NA),
@@ -423,7 +423,9 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
 # Bind together bad salinity and temperature for error table ------------------
 
-    bad_sal_temp <- bad_temperature %>% dplyr::bind_rows(bad_salinity)
+    bad_sal_temp <- bad_temperature %>% dplyr::bind_rows(bad_salinity)%>%
+      as.data.frame(.)
+
 
 # Rearrange columns for EcoDAAT format ----------------------------------------
     bongo_data <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME, HAUL_NAME,
@@ -444,10 +446,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   }
 
 # Make problem files text -----------------------------------------------------
-  no_data_files <- unlist(no_data_files)
-  No_head_files <- unlist(no_head_files)
-
-  problem_files <- append(no_data_files, no_head_files)
+  no_data_files <- as.data.frame(dplyr::bind_rows(no_data_files))
+  No_head_files <- as.data.frame(dplyr::bind_rows(no_head_files))
 
 # Make a single file of all cruise data ---------------------------------------
   cruise_data_all <- as.data.frame(dplyr::bind_rows(cruise_data))%>%
@@ -470,6 +470,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   summary_fc <- summary(cruise_data_all %>%
                         select(LAT, LON, DEPTH_BOTTOM, DEPTH, PRESSURE,
                                TEMPERATURE1, SALINITY1,  CONDUCTIVITY1, SIGMA_T))
+  summary_fc <- summary_fc[-c(2,5),]
 
 
   how_many_tows <- unique(paste(cruise_data_all$STATION_NAME,
@@ -511,45 +512,69 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   lon_range_check <- round(range(cruise_data_all$LON, na.rm = TRUE),
                            digits = 3)
 
-  cruise_summary <- paste(
-        "Quick Cruise FastCat Summary.\n\n", "During the cruise, ",
-         cruise_name_check[1], ", there were ", tows,
-         " tows with depth, temperature, and salinity collected.",
-         " Tows were taken during the time period from ",
-        time_range_check[1], " to ", time_range_check[2], ". ",
-        "Temperature ranged from ", temp_range_check[1], " to ",
-        temp_range_check[2], " with a mean of ", temp_mean, "C. ",
-        "Salinity ranged from ", sal_range_check[1], " to ",
-        sal_range_check[2], " with a mean of ", sal_mean, " PSU. ",
-        "The deepest tow was ", depth_range_check, " meters.",
-        " The Southern most bongo tow was ", lat_range_check[1],
-        " and the furthest North was ", lat_range_check[2],
-        " Latitude. The Western most bongo tow was ", lon_range_check[1],
-        " and the Eastern most was ", lon_range_check[2], " Longitude.",
-        "\n\nIf any of this looks suspect,",
-        "check for the values in the .csv file and then correct in MasterCOD.",
-        " After this is done, re-run the Perl script and then re-run FastrCAT.\n\n",
-        "SUMMARY\n\n", "CRUISE_NAMES\n",
-        str_c(cruise_name_check, collapse = ", "),
-        "\n\nSTATION_HAUL_NAMES\n",
-        str_c(str_replace_na(how_many_tows), collapse = ", "),
-        "\n\nFOCI_GRID_NAMES\n",
-        str_c(str_replace_na(unique(cruise_data_all$FOCI_GRID)),
-              collapse = ", "), "\n\nBOTTOM_DEPTHS\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),3]), collapse = "\n"),
-        "\n\nTOW_DEPTHS\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),4]), collapse = "\n"),
-        "\n\nPRESSURE\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),5]), collapse = "\n"),
-        "\n\nTEMPERATURE\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),6]), collapse = "\n"),
-        "\n\nSALINITY\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),7]), collapse = "\n"),
-        "\n\nCONDUCTIVITY\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),8]), collapse = "\n"),
-        "\n\nSIGMA_T\n",
-        str_c(str_replace_na(summary_fc[-c(2,5),9]), collapse = "\n"),
-        sep = "")
+  cruise_report <- c(
+    '---',
+    'title: "Cruise Report for `r cruise_name_check[1]` " ',
+    'output: htm_document',
+    '---',
+    '',
+    '## Cruise Report for `r cruise_name_check[1]`',
+    '',
+    '### Quick Cruise FastCAT Summary',
+    '',
+    'During the cruise `r cruise_name_check[1]` there were `r tows` tows with',
+    'depth, temperature, and salinity collected. Tows were taken during the',
+    'time period from `r time_range_check[1]` to `r time_range_check[2]`.',
+    'Temperature ranged from `r temp_range_check[1]` to `r temp_range_check[2]`',
+    'with a mean of `r temp_mean` Celcius. Salinity ranged from `r sal_range_check[1]`',
+    'to `r sal_range_check[2]` with a mean of `r sal_mean` PSU. The deepest',
+    'tow was `r depth_range_check` meters. The Southern most bongo to was ',
+    '`r lat_range_check[1]` and the furthest North was `r lat_range_check[2]`',
+    'Latitude. The Western most bongo tow was `r lon_range_check[1]` and the',
+    'Eastern most was `r lon_range_check[2]` Longitude.',
+    '',
+    '',
+    'If any of this looks suspect, check for the values in the .csv file and',
+    'then correct in MasterCOD. After this is done, re-run the Perl script and',
+    'then re-run FastrCAT.',
+    '',
+    '### Summary Statistics',
+    '```{r, echo = FALSE}',
+    'print(summary_fc)',
+    '```',
+    '### Anomalous Salinity and Temperature',
+    '',
+    'These values for salinity and temperature are outside of known ranges.',
+    'They have been filtered out of the data, because they are outside the',
+    'know ranges for salinity and temperature. NA\'s refer to no outlier',
+    'values found either below the minimum cutoff or above the maximum cutoff.',
+    '```{r,echo = FALSE}',
+    'print(bad_sal_temp)',
+    '```',
+    '### No Header Files',
+    '',
+    'These files have been identified as having no header information. It is most',
+    'likely that you ran the Perl script prior to entering the station COD form',
+    'into MasterCOD. Please re-run Perl script and then make_dataframe_fc()',
+    'after you have checked that you enterd the COD form. If there is not',
+    'anything below then all header information was present.',
+    '```{r, echo = FALSE}',
+    'print(No_head_files)',
+    '```',
+    '### No Data Files',
+    '',
+    'Below are files which were identified as having no data. Make sure that this',
+    'is true. Since all casts are processed by the perl script and the',
+    'make_dataframe_fc() regardless if they were Good, Questionable, or "Failure.',
+    '```{r, echo = FALSE}',
+    'print(no_data_files)',
+    '```')
+
+# Render Cruise Report
+      markdown::markdownToHTML(text = knitr::knit(text = cruise_report),
+                               output = paste(current_path, paste(cruise_id,
+                                        "Cruise_Report.html", sep = "_"),
+                                        sep = "/"))
 
 # Changes date to character to avoid Excel date-time errors--------------------
   cruise_data_all$DATE %<>% as.character()
@@ -562,13 +587,9 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Makes the file name ---------------------------------------------------------
   file_name <- paste(cruise_id, "_forEcoDAAT", sep = "", ".csv")
 
-# Writes files to folder ------------------------------------------------------
+# Write data to folder ------------------------------------------------------
   readr::write_csv(cruise_data_all, file.path(current_path, file_name))
-  write.table(problem_files, file = paste(current_path, paste(cruise_id,
-                                          "warnings.txt", sep = "_")
-                                         , sep = "/"), eol = "\n\n")
-  write.table(cruise_summary, file = paste(current_path,
-                                           paste(cruise_id,"cruise_summary.txt",
-                                           sep = "_"), sep = "/"), eol = "\n\n")
+
+
 }
 
