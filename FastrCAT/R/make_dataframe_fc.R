@@ -14,8 +14,8 @@
 #' @param GE A logical value, Returns the dataframe to the global R environment.
 #' By defulaut it is set to FALSE. Set to TRUE if you would like the data
 #' available in the global environment.
-#' @return .csv file of all .up files. A .txt file of warnings and one
-#' of summary statistics.
+#' @return .csv file of all .up file data. An .html file with a cruise
+#' summary and data QAQC output.
 
 
 
