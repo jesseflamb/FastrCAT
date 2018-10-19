@@ -446,8 +446,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   }
 
 # Make problem files text -----------------------------------------------------
-  no_data_files <- as.data.frame(dplyr::bind_rows(no_data_files))
-  No_head_files <- as.data.frame(dplyr::bind_rows(no_head_files))
+  no_data_files <- data.frame(unlist(no_data_files))
+  No_head_files <- data.frame(unlist(no_head_files))
 
 # Make a single file of all cruise data ---------------------------------------
   cruise_data_all <- as.data.frame(dplyr::bind_rows(cruise_data))%>%
@@ -521,6 +521,43 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   lon_range_check <- round(range(cruise_data_all$LON, na.rm = TRUE),
                            digits = 3)
 
+# Plot information for cruise report ------------------------------------------
+  plot_colors <- c("#1565C0","#b92b27")
+  names(plot_colors) <- c("SALINITY1", "TEMPERATURE1")
+
+  plot_data <- cruise_data_all %>% dplyr::select(STATION_NAME, HAUL_NAME,
+                                                  DEPTH, TEMPERATURE1,
+                                                  SALINITY1, DIRECTORY)%>%
+    tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
+                 remove = FALSE)%>%
+    tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))
+
+  ts_plot <- ggplot2::ggplot(data = plot_data)+
+    ggplot2::geom_smooth(aes(MEASURMENT, -(DEPTH), color = TYPE,
+                             fill = TYPE), size = 2, method = "loess",
+                             se = TRUE, alpha = 0.6)+
+    #ggplot2::scale_y_continuous(breaks = depth_breaks,
+     #                           labels = depth_labels)+
+    ggplot2::scale_color_manual(values = plot_colors)+
+    ggplot2::scale_fill_manual(values = plot_colors)+
+    ggplot2::theme_bw()+
+    ggplot2::theme(
+      axis.text.y = element_text(face = "bold", size = 12),
+      axis.text.x = element_text(face = "bold", size = 12),
+      axis.title.x  = element_text(face = "bold", size = 14),
+      axis.title.y  = element_text(face = "bold", size = 14),
+      title = element_text(face = "bold", size = 18),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      legend.position = "none")+
+    ggplot2::ylab(label = "Depth [m]")+
+    ggplot2::xlab(label = expression(bold(paste("Salinity[PSU]",
+                                                "\t\t\t\t\t\t\t\t\t\t\t",
+                                                paste("Temperature",
+                                                      "["~degree~C, "]"))))) +
+    #ggplot2::ggtitle(label = plot_title)+
+    ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
+
 # Cruise Summary, in Rmarkdown format -----------------------------------------
   cruise_report <- c(
     '---',
@@ -543,6 +580,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'Latitude. The Western most bongo tow was `r lon_range_check[1]` and the',
     'Eastern most was `r lon_range_check[2]` Longitude.',
     '',
+    '### Average Salinity and Temperature Profiles',
+    '',
+    '```{r, echo = FALSE, warnings = FALSE}',
+    'print(ts_plot)',
+    '```',
     '',
     'If any of this looks suspect, check for the values in the .csv file and',
     'then correct in MasterCOD. After this is done, re-run the Perl script and',
