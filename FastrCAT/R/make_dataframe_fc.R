@@ -64,18 +64,18 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # When file has header information --------------------------------------------
 
 # Get latitude ----------------------------------------------------------------
-      lat_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
+      lat_id <- if(is.na(stringr::str_trim(unlist(strsplit(
                     full_table[grep("@ Latitude?",
                     full_table,ignore.case = TRUE)], ":")))[2])){
         lat_id <- as.double(NA)
         }else{
-        lat_id <-stringr::str_trim(unlist(stringr::strsplit(
+        lat_id <-stringr::str_trim(unlist(strsplit(
                                    full_table[grep("@ Latitude?", full_table,
                                    ignore.case = TRUE)], ":"))[2],
                                    side = "both")}
 
 # Get longitude ---------------------------------------------------------------
-      long_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
+      long_id <- if(is.na(stringr::str_trim(unlist(strsplit(
                     full_table[grep("@ Longitude?", full_table,
                     ignore.case = TRUE)], ":")))[2])){
         long_id <- as.double(NA)
@@ -86,43 +86,43 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                      ":"))[2], side = "both")}
 
 # Get the date ----------------------------------------------------------------
-      date_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
+      date_id <- if(is.na(stringr::str_trim(unlist(strsplit(
                     full_table[grep("@ Date?", full_table,ignore.case = TRUE)],
                     ":")))[2])){
         date_id <- as.character(NA) #If the date is missing subs an NA.
       }else{
-        date_id <- stringr::str_trim(unlist(stringr::strsplit(
+        date_id <- stringr::str_trim(unlist(strsplit(
                             full_table[grep("@ Date?", full_table,
                             ignore.case = TRUE)], ":"))[2], side = "both")}
 
 # Get the time ----------------------------------------------------------------
-      time_id <-  if(is.na(stringr::str_trim(unlist(stringr::strsplit(
+      time_id <-  if(is.na(stringr::str_trim(unlist(strsplit(
                     full_table[grep("@ Cast?", full_table,ignore.case = TRUE)],
                     ":")))[2])){
         time_id <- as.character(NA)
       }else{
         time_id <- strftime(as.POSIXct(paste(date_id,
                             stringr::str_pad(stringr::str_trim(unlist(
-                            stringr::strsplit(full_table[grep("@ Cast?",
+                            strsplit(full_table[grep("@ Cast?",
                             full_table, ignore.case = TRUE)],":"))[2],
                             side = "both"), width = 4, side = "left", pad = "0"),
                             sep = "-"), format = "%d%b%y-%H%M", tz = "UTC"),
                             format = "%H:%M:%S", tz = "UTC")}
 
 # Get the cruise name ---------------------------------------------------------
-      cruise_id <- if(is.na(stringr::str_trim(unlist(stringr::strsplit(
+      cruise_id <- if(is.na(stringr::str_trim(unlist(strsplit(
                       full_table[grep("@ Cruise?",
                       full_table,ignore.case = TRUE)], ":")))[2])){
         cruise_id <- as.character(NA)#If Cruise is missing subs an NA
       }else{
-        cruise_id <- toupper(stringr::str_trim(unlist(stringr::strsplit(
+        cruise_id <- toupper(stringr::str_trim(unlist(strsplit(
                              full_table[grep("@ Cruise?", full_table,
                              ignore.case = TRUE)], ":"))[2], side = "both"))}
 
 # Get the station name --------------------------------------------------------
       station_id_p <- if(length(full_table[grep("@ Station?",
                          full_table,ignore.case = TRUE)])!=0){
-        station_id_p <- stringr::str_trim(unlist(stringr::strsplit(
+        station_id_p <- stringr::str_trim(unlist(strsplit(
                                  full_table[grep("@ Station?",
                                  full_table,ignore.case = TRUE)],
                                  ":"))[2], side = "both")
@@ -132,7 +132,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
       haul_id_p <- if(length(full_table[grep("@ Haul?",
                       full_table, ignore.case = TRUE)]) != 0 ){
-        haul_id <- stringr::str_trim(unlist(stringr::strsplit(
+        haul_id <- stringr::str_trim(unlist(strsplit(
                             full_table[grep("@ Haul?", full_table,
                             ignore.case = TRUE)], ":"))[2], side = "both")
         }else{
@@ -142,16 +142,16 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       grid_id <- if(length(full_table[grep("@ Grid?",
                     full_table,ignore.case = TRUE)]) == 0){
         grid_id <- as.character(NA)
-      }else if (is.na(stringr::str_trim(unlist(stringr::strsplit(
+      }else if (is.na(stringr::str_trim(unlist(strsplit(
                 full_table[grep("@ Grid?", full_table,ignore.case = TRUE)],
                 ":")))[2])){
         grid_id <- as.character(NA)
-      }else if(stringr::str_detect(stringr::str_trim(unlist(stringr::strsplit(
+      }else if(stringr::str_detect(stringr::str_trim(unlist(strsplit(
                full_table[grep("@ Grid?", full_table,ignore.case = TRUE)],
                ":"))[2], side = "both"), "BON\\") == TRUE){
         grid_id <- as.character(NA)
       }else {
-        grid_id <- toupper(stringr::str_trim(unlist(stringr::strsplit(
+        grid_id <- toupper(stringr::str_trim(unlist(strsplit(
                            full_table[grep("@ Grid?",
                            full_table,ignore.case = TRUE)], ":"))[2],
                            side = "both"))}
@@ -161,7 +161,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                        as.numeric(station_id_p))) == TRUE){
         station_id <- as.integer(NA)
       }else if(stringr::str_detect(station_id_p,"[.]") == TRUE){
-        station_id <- unlist(stringr::strsplit(station_id_p,"[.]"))[1]
+        station_id <- unlist(strsplit(station_id_p,"[.]"))[1]
       }else{
         station_id <- station_id_p
       }
@@ -177,7 +177,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       haul_id <- if(is.na(haul_id_p) == TRUE &
                    !is.na(station_id_p) &
                    stringr::str_detect(station_id_p, "[.]") == TRUE){
-        haul_id <- unlist(stringr::strsplit(station_id_p, "[.]"))[2]
+        haul_id <- unlist(strsplit(station_id_p, "[.]"))[2]
       }else if(is.na(haul_id_p) == TRUE){
         haul_id <- as.integer(NA)
       }else{
@@ -187,7 +187,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Get the depth ---------------------------------------------------------------
       depth_id <- if(length(full_table[grep("@ Water?", full_table,
                      ignore.case = TRUE)]) != 0 ){
-        depth_id <- stringr::str_trim(unlist(stringr::strsplit(
+        depth_id <- stringr::str_trim(unlist(strsplit(
                              full_table[grep("@ Water?", full_table,
                              ignore.case = TRUE)], ":"))[2], side = "both")
       }else{
@@ -196,7 +196,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Get instrument type ---------------------------------------------------------
       instrument_id <- if(length(full_table[grep("@ Instrument?", full_table,
                           ignore.case = TRUE)]) != 0){
-        instrument_id <- stringr::str_trim(unlist(stringr::strsplit(
+        instrument_id <- stringr::str_trim(unlist(strsplit(
                                   full_table[grep("@ Instrument??", full_table,
                                   ignore.case = TRUE)], ":"))[2], side = "both")
       }else{
@@ -204,11 +204,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       }
 
 # Reformat latitude and longitude to prep for conversion ----------------------
-      lat_id <- paste(unlist(stringr::strsplit(lat_id, " "))[1],
-                      unlist(stringr::strsplit(lat_id, " "))[2], sep = " ")
+      lat_id <- paste(unlist(strsplit(lat_id, " "))[1],
+                      unlist(strsplit(lat_id, " "))[2], sep = " ")
 
-      long_id <- paste(unlist(stringr::strsplit(long_id, " "))[1],
-                       unlist(stringr::strsplit(long_id, " "))[2], sep = " ")
+      long_id <- paste(unlist(strsplit(long_id, " "))[1],
+                       unlist(strsplit(long_id, " "))[2], sep = " ")
     }
 
 # Get columnar data -----------------------------------------------------------
@@ -292,7 +292,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 # Gets all data column names --------------------------------------------------
             for(n in 1:col_length){
 
-            name0 <- unlist(stringr::strsplit(
+            name0 <- unlist(strsplit(
                             full_table[grep(paste("# name",col_nums[n],
                             sep = " "), full_table, ignore.case = TRUE)],
                             "= "))[2]
