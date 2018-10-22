@@ -53,9 +53,21 @@ This function writes a single data frame in .csv format to file containing ocean
  make_dataframe_fc("path/ to directory/ of .up files")
 ```
 
+Shows the first four rows and the first seven columns of an example dataframe. 
+```{r, echo = FALSE}
+example_file <- read.csv("DY14-08_forEcoDAAT.csv")
+head(example_file[,c(1:7)],4)
+```
+
+All the column names:
+
+```{r, echo = FALSE}
+colnames(example_file)
+```
+
 **MasterCOD Acquired Information**
 
-	All header information is hand entered into MasterCOD from a COD form for each consecutive FastCAT deployment. Header information acquired by the PERL script has not been consistent across all years. Since 1997 theses have been the various headers acquired from MasterCOD: latitude, longitude, date, time, cruise name, station name, haul name, Foci grid name, bottom depth, and instrument type. The function as built handles all types of header information listed above. Latitude and longitude are converted from degrees minutes seconds to decimal degrees. Date and time are converted into a date-time format set with a UTC time zone. One common error is that no header information is found. This error is most commonly due to the FastCat data being processed prior to station information being entered into MasterCOD. The function FastCat_compile.R within the package FastrCAT will generate a txt file with a warning. 
+All header information is hand entered into MasterCOD from a COD form for each consecutive FastCAT deployment. Header information acquired by the PERL script has not been consistent across all years. Since 1997 theses have been the various headers acquired from MasterCOD: latitude, longitude, date, time, cruise name, station name, haul name, Foci grid name, bottom depth, and instrument type. The function as built handles all types of header information listed above. Latitude and longitude are converted from degrees minutes seconds to decimal degrees. Date and time are converted into a date-time format set with a UTC time zone. One common error is that no header information is found. This error is most commonly due to the FastCat data being processed prior to station information being entered into MasterCOD. The function FastCat_compile.R within the package FastrCAT will generate a warning which is in the Cruise Report. 
 	
 
 **Example Header Warning**
@@ -80,7 +92,7 @@ Issues that can’t be resolved by the make_dataframe_fc() are when Cruise names
 
 **Seasoft Binned Data**
 
-In each .up file the numerical data is found in tab delineated columnar format after \*END*. Each row in the .up file represents a single integer of pressure. The SeaBird FastCAT takes readings 16 times a second. For all values within an integer of pressure, one can select an average or an interpolated average. Over the years there have been as few as four columns of data up to nine. First the function looks to see if there is any data. If there is no data then a text file will be output. 
+In each .up file the numerical data is found in tab delineated columnar format after \*END*. Each row in the .up file represents a single integer of pressure. The SeaBird FastCAT takes readings 16 times a second. For all values within an integer of pressure, one can select an average or an interpolated average. Over the years there have been as few as four columns of data up to nine. First the function looks to see if there is any data. If there is no data then a warning will be in the Cruise Report. 
 
 
 **No data warning example:**
@@ -90,9 +102,9 @@ In each .up file the numerical data is found in tab delineated columnar format a
 When this occurs then header information is still gathered so there is a record of it but it will have blanks for all the numerical data columns. The function can handle the inconsistent column amounts. It looks for the name of each column and renames it in a standard format so that all data generated can be easily bound together. The data columns selected were pressure, temperature, conductivity, salinity, sigma_T, and flag. When there are more than these they will be dropped from the dataframe. Depth is added as a calculated value from pressure. The calculation is based on the AN69: Conversion of Pressure to Depth documented on the SeaBird website. This conversion requires latitude, so if latitude is missing depth will be an NA. Finally there are sometimes bad spikes in the data, a common cause being a bad termination. There is a filter in the function to remove temperatures less than -3 and greater than 20. As well as salinity values less than 0.05 and greater than 38. 
 
 
-**Cruise Summary .txt**
+**Cruise Summary .html**
 
-	Provides a short paragraph of number of tows, salinity, temperature, and location information. Summary statistics: minimum, median, mean, max, and number of NA’s are also provided. This provides the user a paragraph ready for a cruise report and can be used as a quick data check.  If data seems incorrect then it is advised that values be corrected in MasterCOD and then to re-run the perl script and make_dataframe_fc(). Then a new summary will be generated. 
+Provides a short paragraph of number of tows, salinity, temperature, and location information. Summary statistics: minimum, median, mean, max, and number of NA’s are also provided. This provides the user a paragraph ready for a cruise report and can be used as a quick data check.  There is a plot of the average temperature salinity plot profile with 95% confidence intervals. A station map. And QA/QC information about missing header data, no data files, and files which contained outlier salinity and temperature data which was filtered out. If data seems incorrect then it is advised that values be corrected in MasterCOD and then to re-run the perl script and make_dataframe_fc(). Then a new summary will be generated. 
 
 **Example of summary paragraph, excludes summary statistics after bottom depth:**
 
@@ -101,6 +113,7 @@ When this occurs then header information is still gathered so there is a record 
 >
 During the cruise, MF08-02, there were 32 tows with depth, temperature, and salinity collected. Tows were taken during the time period from 2008-02-18 to 2008-02-26. Temperature ranged from 2.11 to 4.13 with a mean of 3.57C. Salinity ranged from 4.11 to 34.11 with a mean of 33.32 PSU. The deepest tow was 596 meters. The Southern most bongo tow was 53.65 and the furthest North was 55.328 Latitude. The Western most bongo tow was -168.374 and the Eastern most was -164.88 Longitude.
 >
+>Plot of average ts plot, station plot
 >
 If any of this looks suspect, check for the values in the .csv file and then correct in MasterCOD. After this is done, re-run the Perl script and then re-run FastrCAT.
 >
@@ -125,6 +138,13 @@ Mean   : 835.8
 Max.   :2150.0  
 NA's   :1003
 >
+Anomalous Salinty and Temperature
+>
+Header Warnings
+>
+No Data Warnings
+>
+
 
 
 Notice that this cruise has multiple cruise names, these would need to be corrected in MasterCOD. Instead of Station and haul names there are only FOCI grid names. Make sure that this is what is wanted for the cruise and correct in MasterCOD. In this case the cruise station haul info was in the .up file name, this is an artifact of older cruises. Bottom depth also had a lot of NA’s. This cruise had several tows in very deep water, this mean there were a couple of tows where bottom depth was not recorded in MasterCOD. You can discover which files didn’t have bottom depth recorded by filtering for NA’s in the BOTTOM_DEPTHS column in the .csv file and looking at the DIRECTORY column for the cast number. From this we discover that it was two casts, ST14H1.up and ST15.H1.up or FOCI grids BP07 and BS04. Then go back and correct in MasterCOD if necessary. 
@@ -133,7 +153,7 @@ Notice that this cruise has multiple cruise names, these would need to be correc
 
 plot_ts_fc()
 ---
-	Once make_dataframe_fc() has been run, then plot_ts_fc() can be used. This function creates a depth by salinity and temperature plot for each station. 
+Once make_dataframe_fc() has been run, then plot_ts_fc() can be used. This function creates a depth by salinity and temperature plot for each station. 
 	
 ```{r,eval=FALSE}
  plot_ts_fc("path/ to directory/ of fastrcat dataframe")
@@ -221,7 +241,7 @@ Example of Using FastrCAT in the command line:
 	
 Comments on historical .up files
 ---
-	In order to re-run older files due to missing header information it will require finding the appropriate MasterCOD.db3 files and the folder with the .XMLCON, .hdr, and .hex files. The greatest amount of time will be spent retrieving the .db3 files for each cruise. An estimate for finding one file is 30 minutes. But once found it will only take a minute to reprocess. When evaluating the Processed folder it seems that 11 cruises will need to be reprocessed. There are most likely more cruises as the processed folder in incomplete. Some folders only have an excel file, this is the case for all Oshoro Maru cruises. This will require editing the excel file into the format requested for EcoDAAT. 
+In order to re-run older files due to missing header information it will require finding the appropriate MasterCOD.db3 files and the folder with the .XMLCON, .hdr, and .hex files. The greatest amount of time will be spent retrieving the .db3 files for each cruise. An estimate for finding one file is 30 minutes. But once found it will only take a minute to reprocess. When evaluating the Processed folder it seems that 11 cruises will need to be reprocessed. There are most likely more cruises as the processed folder in incomplete. Some folders only have an excel file, this is the case for all Oshoro Maru cruises. This will require editing the excel file into the format requested for EcoDAAT. 
 
 
 http://www.seabird.com/document/an69-conversion-pressure-depth
