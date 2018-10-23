@@ -505,6 +505,9 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
   year <- lubridate::year(max(cruise_data_all$DATE, na.rm = TRUE))
 
+  temp_range_check <- round(range(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
+                            digits = 2)
+
   temp_mean <- round(mean(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
                      digits = 2)
 
@@ -527,26 +530,29 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
   plot_data <- cruise_data_all %>% dplyr::select(STATION_NAME, HAUL_NAME,
                                                   DEPTH, TEMPERATURE1,
-                                                  SALINITY1, DIRECTORY)%>%
+                                                  SALINITY1,
+                                                 DIRECTORY)%>%
     tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
                  remove = FALSE)%>%
     tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
-    group_by(DEPTH,TYPE)%>%
+    group_by(DEPTH, TYPE)%>%
+# Calculates mean and 95% confidence intervals for plot -----------------------
     summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
-              MAX = max(MEASURMENT, na.rm = TRUE),
-              MIN = min(MEASURMENT, na.rm = TRUE))
+              CI_95 = mean(MEASURMENT, na.rm = TRUE) +
+                qnorm(0.975)*sd(MEASURMENT,
+                                na.rm = TRUE)/sqrt(length(MEASURMENT)),
+              CI_5 = mean(MEASURMENT, na.rm = TRUE) -
+                qnorm(0.975)*sd(MEASURMENT,
+                                na.rm = TRUE)/sqrt(length(MEASURMENT)))
 
-  ts_plot <- ggplot2::ggplot(data = plot_data)+
-    #ggplot2::geom_line(aes(MAX, -(DEPTH),color = TYPE),
-                      # alpha = 0.5)+
-   # ggplot2::geom_line(aes(MIN, -(DEPTH),color = TYPE),
-                       #alpha = 0.5)+
-    ggplot2::geom_line(aes(MEAN, -(DEPTH), color = TYPE),
-                             size = 2,alpha = 0.6)+
-    #ggplot2::scale_y_continuous(breaks = depth_breaks,
-     #                           labels = depth_labels)+
+
+
+  ts_plot <-   ggplot(plot_data)+
+    geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
+                        color = TYPE),fatten = 6, alpha = 0.6)+
     ggplot2::scale_color_manual(values = plot_colors)+
     ggplot2::scale_fill_manual(values = plot_colors)+
+    ggplot2::coord_flip()+
     ggplot2::theme_bw()+
     ggplot2::theme(
       axis.text.y = element_text(face = "bold", size = 12),
@@ -557,12 +563,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
       strip.background = element_blank(),
       strip.text = element_blank(),
       legend.position = "none")+
-    ggplot2::ylab(label = "Depth [m]")+
-    ggplot2::xlab(label = expression(bold(paste("Salinity[PSU]",
+    ggplot2::xlab(label = "Depth [m]")+
+    ggplot2::ylab(label = expression(bold(paste("Salinity[PSU]",
                                                 "\t\t\t\t\t\t\t\t\t\t\t",
                                                 paste("Temperature",
                                                       "["~degree~C, "]"))))) +
-    #ggplot2::ggtitle(label = plot_title)+
     ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
 
 # Cruise Summary, in Rmarkdown format -----------------------------------------
@@ -589,8 +594,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     '',
     '### Average Salinity and Temperature Profiles',
     '',
-    '```{r, echo = FALSE, warnings = FALSE}',
-    'print(ts_plot)',
+    'Plot shows average salinity and temperature (point) and 95% Confidence',
+    'Intervals for each integer of depth.',
+    '',
+    '```{r, echo = FALSE, results = "hide", fig.keep = "all"}',
+    'print(suppressWarnings(ts_plot))',
     '```',
     '',
     'If any of this looks suspect, check for the values in the .csv file and',
@@ -631,7 +639,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'print(no_data_files)',
     '```')
 
-# Render Cruise Report
+# Render Cruise Report --------------------------------------------------------
       markdown::markdownToHTML(text = knitr::knit(text = cruise_report),
                                output = paste(current_path, paste(cruise_id,
                                         "Cruise_Report.html", sep = "_"),
