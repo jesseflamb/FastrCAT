@@ -6,9 +6,10 @@ output: rmarkdown::html_vignette
 fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   \usepackage[utf8]{inputenc}
 ---
+
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -108,8 +109,8 @@ Provides a short paragraph of number of tows, salinity, temperature, and locatio
 
 **Example of Cruise Summary**
 
-```{r, echo = FALSE}
-htmltools::includeHTML("DY1705_Cruise_Report.html")
+```{r, echo = FALSE, results = 'asis'}
+knitr::asis_output(htmltools::includeHTML("DY1705_Cruise_Report.html"))
 ```
 
 
