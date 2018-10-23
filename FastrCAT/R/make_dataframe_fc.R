@@ -238,6 +238,7 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
       col_nums <- as.character(seq(0,(col_length -1), by = 1))
 
+# These are all the differnt ways we have selected names for measuments in SeaSoft.
       pref_col_names<- c("timeS: time [s]",
                          "timeS: Time, Elapsed [seconds]",
                          "timeJ: Julian Days",
