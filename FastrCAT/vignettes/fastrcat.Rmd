@@ -106,45 +106,11 @@ When this occurs then header information is still gathered so there is a record 
 
 Provides a short paragraph of number of tows, salinity, temperature, and location information. Summary statistics: minimum, median, mean, max, and number of NA’s are also provided. This provides the user a paragraph ready for a cruise report and can be used as a quick data check.  There is a plot of the average temperature salinity plot profile with 95% confidence intervals. A station map. And QA/QC information about missing header data, no data files, and files which contained outlier salinity and temperature data which was filtered out. If data seems incorrect then it is advised that values be corrected in MasterCOD and then to re-run the perl script and make_dataframe_fc(). Then a new summary will be generated. 
 
-**Example of summary paragraph, excludes summary statistics after bottom depth:**
+**Example of Cruise Summary**
 
->"1" "Quick Cruise FastCat Summary.
->
->
-During the cruise, MF08-02, there were 32 tows with depth, temperature, and salinity collected. Tows were taken during the time period from 2008-02-18 to 2008-02-26. Temperature ranged from 2.11 to 4.13 with a mean of 3.57C. Salinity ranged from 4.11 to 34.11 with a mean of 33.32 PSU. The deepest tow was 596 meters. The Southern most bongo tow was 53.65 and the furthest North was 55.328 Latitude. The Western most bongo tow was -168.374 and the Eastern most was -164.88 Longitude.
->
->Plot of average ts plot, station plot
->
-If any of this looks suspect, check for the values in the .csv file and then correct in MasterCOD. After this is done, re-run the Perl script and then re-run FastrCAT.
->
->
-SUMMARY
-CRUISE_NAMES
-MF08-02, MF08=02, MF0802
->
->
-STATION_HAUL_NAMES
-NA.NA
->
->
-FOCI_GRID_NAMES
-BD07, BG07, BJ07, BM07, BP07, BS04, BV04, BV07, BS07, BS10, AX07, BP10, BM10, BJ10, BS01, BV01, AX04, BP19, BM16, BP16, BM19, BS16, BS13, BP13, BM13, BA04, BJ0710, BD04, BG04, BJ04, BM04, BP04
->
->
-BOTTOM_DEPTHS
-Min.   :  75.0  
-Median : 661.0  
-Mean   : 835.8  
-Max.   :2150.0  
-NA's   :1003
->
-Anomalous Salinty and Temperature
->
-Header Warnings
->
-No Data Warnings
->
-
+```{r, echo = FALSE}
+htmltools::includeHTML("DY1705_Cruise_Report.html")
+```
 
 
 Notice that this cruise has multiple cruise names, these would need to be corrected in MasterCOD. Instead of Station and haul names there are only FOCI grid names. Make sure that this is what is wanted for the cruise and correct in MasterCOD. In this case the cruise station haul info was in the .up file name, this is an artifact of older cruises. Bottom depth also had a lot of NA’s. This cruise had several tows in very deep water, this mean there were a couple of tows where bottom depth was not recorded in MasterCOD. You can discover which files didn’t have bottom depth recorded by filtering for NA’s in the BOTTOM_DEPTHS column in the .csv file and looking at the DIRECTORY column for the cast number. From this we discover that it was two casts, ST14H1.up and ST15.H1.up or FOCI grids BP07 and BS04. Then go back and correct in MasterCOD if necessary. 
