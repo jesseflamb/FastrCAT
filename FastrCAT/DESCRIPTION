@@ -12,7 +12,9 @@ Depends: R (>= 3.5.1)
 License: CC0
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr (>= 0.7.6),
+Imports: sf(>= 0.6.3),
+         ggspatial(>= 1.0.2),
+         dplyr (>= 0.7.6),
          ggplot2 (>= 3.0.0),
          grDevices (>= 3.5.1),
          lubridate (>= 1.7.4),
@@ -23,8 +25,7 @@ Imports: dplyr (>= 0.7.6),
          tidyr (>= 0.8.1),
          knitr (>= 1.20),
          markdown (>= 0.8),
-         htmltools (>= 0.3.6),
-         sf(>= 0.6.3)
+         htmltools (>= 0.3.6)
 BugReports: https://gitlab.afsc.noaa.gov/Nissa.Ferm/FastrCAT/issues
 RoxygenNote: 6.1.0
 Suggests: 
