@@ -571,6 +571,62 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                                       "["~degree~C, "]"))))) +
     ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
 
+
+# Station map for Cruise summary-----------------------------------------------
+# bring in the shape files to make the basemap --------------------------------
+
+  MAP <- sf::st_read(dsn = "inst/extdata",layer = "Alaska_dcw_polygon_Project",
+                     quiet = TRUE)
+
+# tranform into WGS84 coordinate system----------------------------------------
+
+  MAP <- sf::st_transform(MAP, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+# bring in 200m bathymetry contour --------------------------------------------
+
+  BATH_200 <- sf::st_read(dsn = "inst/extdata", layer = "ne_10m_bathymetry_K_200",
+                          quiet = TRUE)
+# transform into WGS84 coordinate system---------------------------------------
+
+  BATH_200 <- sf::st_transform(BATH_200,
+                               "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+# coordinate bounding box for map----------------------------------------------
+
+  fc_xlim <- c(min(fc_data$LON, na.rm = TRUE) - 2,
+               max(fc_data$LON, na.rm = TRUE) + 2)
+  fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
+               max(fc_data$LAT, na.rm = TRUE) + 2)
+# map title--------------------------------------------------------------------
+  map_title <- paste("Cruise",unique(fc_data$CRUISE), sep = " ")
+
+# station map data-------------------------------------------------------------
+  Station_map <- cruise_data_all %>%
+    dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
+    tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
+    dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
+
+# station_map------------------------------------------------------------------
+  fc_map <- ggplot2::ggplot()+
+    ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
+    ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
+    ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
+                                unit_category = "metric")+
+    ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
+    ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21, color = "black",
+                        fill = "gray", data = Station_map)+
+    ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL), size = 5,
+                             color = "black",data = Station_map)+
+    ggplot2::theme_bw()+
+    ggplot2::xlab(label = "Longitude")+
+    ggplot2::ylab(label = "Latitude")+
+    ggplot2::ggtitle(label = map_title)+
+    ggplot2::theme(
+      axis.text.y = element_text(face = "bold", size = 12),
+      axis.text.x = element_text(face = "bold", size = 12),
+      axis.title = element_text(face = "bold", size = 12),
+      title = element_text(face = "bold", size = 14))
+
 # Cruise Summary, in Rmarkdown format -----------------------------------------
   cruise_report <- c(
     '---',
@@ -600,6 +656,11 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     '',
     '```{r, echo = FALSE, results = "hide", fig.keep = "all"}',
     'print(suppressWarnings(ts_plot))',
+    '```',
+    '### Station Map',
+    '',
+    '```{r, echo = FALSE, results = "hide", fig.keep = "all"}',
+    'print(suppressWarnings(fc_map))',
     '```',
     '',
     'If any of this looks suspect, check for the values in the .csv file and',
