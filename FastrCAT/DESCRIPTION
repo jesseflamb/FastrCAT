@@ -23,7 +23,8 @@ Imports: dplyr (>= 0.7.6),
          tidyr (>= 0.8.1),
          knitr (>= 1.20),
          markdown (>= 0.8),
-         htmltools (>= 0.3.6)
+         htmltools (>= 0.3.6),
+         sf(>= 0.6.3)
 BugReports: https://gitlab.afsc.noaa.gov/Nissa.Ferm/FastrCAT/issues
 RoxygenNote: 6.1.0
 Suggests: 
