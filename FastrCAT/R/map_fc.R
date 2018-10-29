@@ -15,7 +15,7 @@ map_fc <- function(current_path){
 # find and read in the file created by make_dataframe_fc()---------------------
 
 fc_data <- readr::read_csv(list.files(path = current_path,
-                                      pattern = "\\EcoDATT.csv$",
+                                      pattern = "\\EcoDAAT.csv$",
                                       ignore.case = TRUE,
                                       include.dirs = TRUE,
                                       full.names = TRUE),
@@ -36,7 +36,7 @@ fc_data <- readr::read_csv(list.files(path = current_path,
 
 # bring in the shape files to make the basemap --------------------------------
 
-MAP <- sf::st_read(dsn = NULL,layer = "Alaska_dcw_polygon_Project")
+MAP <- sf::st_read(dsn = "inst/extdata",layer = "Alaska_dcw_polygon_Project")
 
 # tranform into WGS84 coordinate system----------------------------------------
 
@@ -44,7 +44,7 @@ MAP <- sf::st_transform(MAP, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
 # bring in 200m bathymetry contour --------------------------------------------
 
-BATH_200 <- sf::st_read(dsn = NULL, layer = "ne_10m_bathymetry_K_200")
+BATH_200 <- sf::st_read(dsn = "inst/extdata", layer = "ne_10m_bathymetry_K_200")
 
 # transform into WGS84 coordinate system---------------------------------------
 
@@ -53,17 +53,33 @@ BATH_200 <- sf::st_transform(BATH_200,
 
 # coordinate bounding box for map----------------------------------------------
 
-fc_xlim <- c(min(LON, na.rm = TRUE) - 2, max(LON, na.rm = TRUE) + 2)
-fc_ylim <- c(min(LAT, na.rm = TRUE) - 2, max(LAT, na.rm = TRUE) + 2)
+fc_xlim <- c(min(fc_data$LON, na.rm = TRUE) - 2,
+             max(fc_data$LON, na.rm = TRUE) + 2)
+fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
+             max(fc_data$LAT, na.rm = TRUE) + 2)
+
+
+# Station map data if Station.haul---------------------------------------------
+
+Station_map <- fc_data %>%
+  dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
+  tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
+  dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
+
 
 # map--------------------------------------------------------------------------
 
 fc_map <- ggplot2::ggplot()+
   ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
   ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
+  supressWarnings(ggspatial::annotation_scale(location = "bl",
+                                              width_hint = 0.5))+
   ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-  ggplot2::geom_point(aes(LON,LAT), size = 6, shape = 21, color = "black",
-                      fill = "orange", data = RZA %>% fc_data)+
+  ggplot2::geom_point(aes(LON, LAT), size = 6, shape = 21, color = "black",
+                      fill = "orange", data = Station_map)+
+  ggplot2::geom_text(aes(LON, LAT, label = STATION_HAUL), size = 3,
+                     nudge_x = 0.1, nudge_y = 0.15, data = Station_map)+
+
   ggplot2::theme_bw()+
   ggplot2::xlab(label = "Longitude")+
   ggplot2::ylab(label = "Latitude")+
