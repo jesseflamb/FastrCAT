@@ -507,23 +507,23 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
   year <- lubridate::year(max(cruise_data_all$DATE, na.rm = TRUE))
 
   temp_range_check <- round(range(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
-                            digits = 2)
+                            digits = 1)
 
   temp_mean <- round(mean(cruise_data_all$TEMPERATURE1, na.rm = TRUE),
-                     digits = 2)
+                     digits = 1)
 
   sal_range_check <- round(range(cruise_data_all$SALINITY1, na.rm = TRUE),
-                           digits = 2)
+                           digits = 1)
 
   sal_mean <- round(mean(cruise_data_all$SALINITY1, na.rm = TRUE), digits = 2)
 
-  depth_range_check <- round(max(cruise_data_all$DEPTH, na.rm = TRUE),
-                             digits = 2)
+  depth_range_check <- round(range(cruise_data_all$DEPTH, na.rm = TRUE),
+                             digits = 1)
   lat_range_check <- round(range(cruise_data_all$LAT, na.rm = TRUE),
-                           digits = 3)
+                           digits = 2)
 
   lon_range_check <- round(range(cruise_data_all$LON, na.rm = TRUE),
-                           digits = 3)
+                           digits = 2)
 
 # Plot information for cruise report ------------------------------------------
   plot_colors <- c("#1565C0","#b92b27")
@@ -536,20 +536,22 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
                  remove = FALSE)%>%
     tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
-    group_by(DEPTH, TYPE)%>%
+    dplyr::group_by(DEPTH, TYPE)%>%
 # Calculates mean and 95% confidence intervals for plot -----------------------
-    summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
+    dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
               CI_95 = mean(MEASURMENT, na.rm = TRUE) +
                 qnorm(0.975)*sd(MEASURMENT,
                                 na.rm = TRUE)/sqrt(length(MEASURMENT)),
               CI_5 = mean(MEASURMENT, na.rm = TRUE) -
                 qnorm(0.975)*sd(MEASURMENT,
-                                na.rm = TRUE)/sqrt(length(MEASURMENT)))
+                                na.rm = TRUE)/sqrt(length(MEASURMENT)))%>%
+    dplyr::filter(!is.na(MEAN))%>%
+    dplyr::filter(!is.na(CI_95))%>%
+    dplyr::filter(!is.na(CI_5))
 
 
-
-  ts_plot <-   ggplot(plot_data)+
-    geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
+  ts_plot <- ggplot2::ggplot(plot_data)+
+    ggplot2::geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
                         color = TYPE),fatten = 6, alpha = 0.6)+
     ggplot2::scale_color_manual(values = plot_colors)+
     ggplot2::scale_fill_manual(values = plot_colors)+
@@ -593,14 +595,13 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
 
 # coordinate bounding box for map----------------------------------------------
 
-  fc_xlim <- c(min(fc_data$LON, na.rm = TRUE) - 2,
-               max(fc_data$LON, na.rm = TRUE) + 2)
-  fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
-               max(fc_data$LAT, na.rm = TRUE) + 2)
-# map title--------------------------------------------------------------------
-  map_title <- paste("Cruise",unique(fc_data$CRUISE), sep = " ")
+  fc_xlim <- c(min(cruise_data_all$LON, na.rm = TRUE) - 2,
+               max(cruise_data_all$LON, na.rm = TRUE) + 2)
+  fc_ylim <- c(min(cruise_data_all$LAT, na.rm = TRUE) - 2,
+               max(cruise_data_all$LAT, na.rm = TRUE) + 2)
 
-# station map data-------------------------------------------------------------
+
+# station map data for Station haul--------------------------------------------
   Station_map <- cruise_data_all %>%
     dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
     tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
@@ -615,17 +616,16 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
     ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21, color = "black",
                         fill = "gray", data = Station_map)+
-    ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL), size = 5,
-                             color = "black",data = Station_map)+
+    #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL), size = 4,
+                             #color = "black",data = Station_map)+
     ggplot2::theme_bw()+
     ggplot2::xlab(label = "Longitude")+
     ggplot2::ylab(label = "Latitude")+
-    ggplot2::ggtitle(label = map_title)+
     ggplot2::theme(
       axis.text.y = element_text(face = "bold", size = 12),
       axis.text.x = element_text(face = "bold", size = 12),
-      axis.title = element_text(face = "bold", size = 12),
-      title = element_text(face = "bold", size = 14))
+      axis.title.x  = element_text(face = "bold", size = 14),
+      axis.title.y  = element_text(face = "bold", size = 14))
 
 # Cruise Summary, in Rmarkdown format -----------------------------------------
   cruise_report <- c(
@@ -644,9 +644,9 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'Temperature ranged from `r temp_range_check[1]` to `r temp_range_check[2]`',
     'with a mean of `r temp_mean` Celcius. Salinity ranged from `r sal_range_check[1]`',
     'to `r sal_range_check[2]` with a mean of `r sal_mean` PSU. The deepest',
-    'tow was `r depth_range_check` meters. The Southern most bongo to was ',
+    'tow was `r depth_range_check[2]`. The Southern most tow was ',
     '`r lat_range_check[1]` and the furthest North was `r lat_range_check[2]`',
-    'Latitude. The Western most bongo tow was `r lon_range_check[1]` and the',
+    'Latitude. The Western most tow was `r lon_range_check[1]` and the',
     'Eastern most was `r lon_range_check[2]` Longitude.',
     '',
     '### Average Salinity and Temperature Profiles',
@@ -654,12 +654,12 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     'Plot shows average salinity and temperature (point) and 95% Confidence',
     'Intervals for each integer of depth.',
     '',
-    '```{r, echo = FALSE, results = "hide", fig.keep = "all"}',
+    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "all"}',
     'print(suppressWarnings(ts_plot))',
     '```',
     '### Station Map',
     '',
-    '```{r, echo = FALSE, results = "hide", fig.keep = "all"}',
+    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "all"}',
     'print(suppressWarnings(fc_map))',
     '```',
     '',
@@ -671,6 +671,25 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
     '```{r, echo = FALSE}',
     'print(summary_fc)',
     '```',
+    '**List of Cruise Names**',
+    'If there is more than one Cruise name, please fix in MasterCOD.',
+    '',
+    '```{r, echo = FALSE}',
+    'print(unique(cruise_data_all$CRUISE))',
+    '```',
+    '',
+    '**List of Station.hauls**',
+    '',
+    '```{r, echo = FALSE}',
+    'print(how_many_tows)',
+    '```',
+    '',
+    '**List of FOCI grid names**',
+    '',
+    '```{r, echo = FALSE}',
+    'print(foci_grid_name_check)',
+    '```',
+    '',
     '### Anomalous Salinity and Temperature',
     '',
     'These values for salinity and temperature are outside of known ranges.',
