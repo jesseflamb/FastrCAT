@@ -41,6 +41,8 @@ Functions in FastrCAT
 
   `plot_ts_fc()`
   
+  `map_fc()`
+  
   `fill_missing_stations()`
   
 
@@ -110,7 +112,7 @@ Provides a short paragraph of number of tows, salinity, temperature, and locatio
 **Example of Cruise Summary**
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::asis_output(htmltools::includeHTML("DY1705_Cruise_Report.html"))
+knitr::asis_output(htmltools::includeHTML("DDY16-06_Cruise_Report.html"))
 ```
 
 
@@ -142,6 +144,24 @@ knitr::include_graphics("AE10-01_Station_41_2.png")
 
 ```
 
+
+
+map_fc()
+---
+
+Once the make_dataframe_fc() has been run and the .csv file of the temperature, salinity, and conductivity is available you can use map_fc(). This function makes a station map. The rendered map will be written to the plot folder. It takes one argument, the path to the .csv file. 
+
+```{r,eval=FALSE}
+ map_fc("path/ to directory/ of fastrcat dataframe")
+```	
+
+Here is an example of a station map. 
+
+```{r echo=FALSE, fig.cap= "Incorrect Output", fig.show='hold'}
+
+knitr::include_graphics("DY1504_Station_map.png")
+
+```
 
 fill_missing_stations()
 ---
