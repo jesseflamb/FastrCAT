@@ -109,26 +109,58 @@ fc_data <- readr::read_csv(list.files(path = current_path,
                                             SALINITY1 = col_double()))%>%
   dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID,
                 DATE, LAT, LON, DEPTH_BOTTOM, DEPTH,
-                TEMPERATURE1, SALINITY1)
+                TEMPERATURE1, SALINITY1)%>%
+# filter for GAK1 box ---------------------------------------------------------
+  dplyr::filter(LAT <= 60.3353 & LAT >= 59.3353)%>%
+  dplyr::filter(LON >= -149.9667 & LON <= -148.9667)
 
-filter_gak <- gak_data%>%
-  dplyr::filter(DATE >= min(lubridate::month(fc_data$DATE)) &
-                DATE <= max(lubridate::month(fc_data$DATE)))
+# filter for min and max of cruise dates---------------------------------------
+gak_plot_data_all <- gak_data%>%
+  dplyr::filter(DEPTH <= max(fc_data$DEPTH, na.rm = TRUE))%>%
+  dplyr::filter(lubridate::month(DATE) >=
+                  min(lubridate::month(fc_data$DATE), na.rm = TRUE) &
+                lubridate::month(DATE) <=
+                  max(lubridate::month(fc_data$DATE), na.rm = TRUE))%>%
+  tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
+  dplyr::group_by(year(DATE),DEPTH, TYPE)%>% #gets the each years average
+  dplyr::summarise(year_MEAN = mean(MEASURMENT, na.rm = TRUE))%>%
+  dplyr::group_by(DEPTH, TYPE)%>%
+  # Calculates mean and 95% confidence intervals for plot -----------------------
+  dplyr::summarise(MEAN = mean(year_MEAN, na.rm = TRUE),
+          CI_95 = mean(year_MEAN, na.rm = TRUE) +
+            qnorm(0.975)*sd(year_MEAN,
+                            na.rm = TRUE)/sqrt(length(year_MEAN)),
+          CI_5 = mean(year_MEAN, na.rm = TRUE) -
+            qnorm(0.975)*sd(year_MEAN,
+                            na.rm = TRUE)/sqrt(length(year_MEAN)))
+# gak1 plot data for year of cruise, no CI's-----------------------------------
+gak_plot_data_year <- gak_data%>%
+  dplyr::filter(DEPTH <= max(fc_data$DEPTH, na.rm = TRUE))%>%
+  dplyr::filter(lubridate::year(DATE) %in% lubridate::year(fc_data$DATE))%>%
+  dplyr::filter(lubridate::month(DATE) >=
+                  min(lubridate::month(fc_data$DATE), na.rm = TRUE) &
+                  lubridate::month(DATE) <=
+                  max(lubridate::month(fc_data$DATE), na.rm = TRUE))%>%
+  tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
+  dplyr::group_by(year(DATE),DEPTH, TYPE)%>% #gets the each years average
+  dplyr::summarise(year_MEAN = mean(MEASURMENT, na.rm = TRUE))%>%
+  dplyr::group_by(DEPTH, TYPE)%>%
+# Calculates mean and 95% confidence intervals for plot ---------------------
+  dplyr::summarise(MEAN = mean(year_MEAN, na.rm = TRUE))
 
 # Plot information for cruise report ------------------------------------------
 plot_colors <- c("#1565C0","#b92b27")
 names(plot_colors) <- c("SALINITY1", "TEMPERATURE1")
 
-plot_data <- fc_data%>% dplyr::select(STATION_NAME, HAUL_NAME,
+fc_plot_data <- fc_data%>% dplyr::select(STATION_NAME, HAUL_NAME,
                                                DEPTH, TEMPERATURE1,
-                                               SALINITY1,
-                                               DIRECTORY)%>%
+                                               SALINITY1)%>%
   tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
                remove = FALSE)%>%
   tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
   dplyr::group_by(DEPTH, TYPE)%>%
 # Calculates mean and 95% confidence intervals for plot -----------------------
-dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
+  dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
                  CI_95 = mean(MEASURMENT, na.rm = TRUE) +
                    qnorm(0.975)*sd(MEASURMENT,
                                    na.rm = TRUE)/sqrt(length(MEASURMENT)),
@@ -140,9 +172,16 @@ dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
   dplyr::filter(!is.na(CI_5))
 
 
-ts_plot <- ggplot2::ggplot(plot_data)+
-  ggplot2::geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
-                               color = TYPE),fatten = 6, alpha = 0.6)+
+ts_plot <- ggplot2::ggplot()+
+  geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95),
+              alpha = 0.5,color = "gray", fill = "gray",
+              data = gak_plot_data_all)+
+  geom_point(aes(-(DEPTH), MEAN), shape = 21, size = 3, color = 'gray',
+             fill = "gray", data = gak_plot_data_year)+
+  geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
+              alpha = 0.5, data = fc_plot_data)+
+  geom_point(aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
+             alpha = 0.8, data = fc_plot_data)+
   ggplot2::scale_color_manual(values = plot_colors)+
   ggplot2::scale_fill_manual(values = plot_colors)+
   ggplot2::coord_flip()+
@@ -163,9 +202,14 @@ ts_plot <- ggplot2::ggplot(plot_data)+
                                                     "["~degree~C, "]"))))) +
   ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
 
+# make the file name ----------------------------------------------------------
+
+name_ts_plot <- paste(current_path,"/plots/",unique(fc_data$CRUISE), "_toGAK1_",
+                      ".png",sep = "")
+
 # Write plot to file ----------------------------------------------------------
 
-grDevices::png(filename = name_ts_plot, width = 500, height = 600,
+grDevices::png(filename = name_ts_plot, width = 700, height = 800,
                units = "px", bg = "transparent")
 
 print(ts_plot)
