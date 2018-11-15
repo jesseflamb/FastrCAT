@@ -4,11 +4,14 @@
 
 library(dataone)
 
+compare_gak1 <- function(current_path, foci_header = TRUE){
+
 # node object for production level dataone environment-------------------------
 cn <- dataone::CNode("PROD")
 
 # The Reasearch Workspace node is the location of the GAK1 line data-----------
 mn <- dataone::getMNode(cn, "urn:node:RW")
+
 # General ---------------------------------------------------------------------
 # Cited Identifier: https://doi.org/10.24431/rw1k1b
 # Abstract
@@ -18,7 +21,8 @@ mn <- dataone::getMNode(cn, "urn:node:RW")
 # the long-term ecosystem monitoring program of the Exxon Valdez Oil Spill
 # Trustee Council for the marine ecosystem affected by the 1989 oil spill.
 # This dataset describes CTD readings from the GAK1 oceanographic station in
-# Prince William Sound. Located at the mouth of Resurrection Bay near Seward,
+# Prince William Sound(59°50.7’N, 149°28.0’W). Located at the mouth of
+# Resurrection Bay near Seward,
 # Alaska, temperature and salinity versus depth profiles have been taken at GAK1
 # since December, 1970. This multi-decade time series is one of the longest
 # running oceanographic time series in the North Pacific. This dataset includes
@@ -45,4 +49,127 @@ mn <- dataone::getMNode(cn, "urn:node:RW")
 gak1_data <- dataone::getObject(mn,"e24107a7-8905-4f55-8c75-8b0831e47a83")%>%
   rawToChar(.)%>%
   textConnection(.)%>%
-  read.csv(., sep = "\t", stringsAsFactors = FALSE)
+  read.table(., sep = "\t", stringsAsFactors = FALSE)
+
+
+
+headers <- unlist(stringr::str_split(gak1_data[1,], pattern = "[:space:]+"))%>%
+                            stringr::str_trim(.)
+headers <- headers[1:8]
+
+
+gak_data <- gak1_data %>%
+  dplyr::slice(-c(1:3))%>%
+  tidyr::separate(V1, headers, extra = "merge", sep = "[:space:]+")%>%
+  dplyr::mutate(Year = as.double(Year),
+         Depth = as.integer(Depth),
+         Temp = as.double(Temp),
+         Sal = as.double(Sal),
+         Sigma = as.double(Sigma),
+         `Delta-D` = as.double(`Delta-D`))%>%
+  dplyr::mutate(Year = format(lubridate::date_decimal(Year),"%Y-%m-%d %H:%M:%OS"))%>%
+  dplyr::mutate(Year = lubridate::ymd_hms(Year))
+
+# Match Foci headers names?----------------------------------------------------
+if(foci_header == TRUE){
+
+  colnames(gak_data) <- c("CRUISE","STATION_NAME","DATE","DEPTH",
+                          "TEMPERATURE1","SALINITY1","SIGMA_T","DELTA-D")
+
+  gak_data <- gak_data %>%
+    dplyr::mutate(TIME = paste(lubridate::hour(DATE),":",
+                               lubridate::minute(DATE), ":",
+                               lubridate::second(DATE), sep = ""),
+                  DATE = lubridate::date(DATE),
+# Add LAT/LON to dataframe for mapping-----------------------------------------
+# GAK1 oceanographic station in Prince William Sound(59°50.7’N, 149°28.0’W)
+                  LAT = as.numeric("59.8353"),
+                  LON = as.numeric("-149.4667"))
+
+
+  }
+
+# find and read in the file created by make_dataframe_fc()---------------------
+
+fc_data <- readr::read_csv(list.files(path = current_path,
+                                      pattern = "\\EcoDAAT.csv$",
+                                      ignore.case = TRUE,
+                                      include.dirs = TRUE,
+                                      full.names = TRUE),
+                           col_types = cols(CRUISE = col_character(),
+                                            STATION_NAME = col_integer(),
+                                            HAUL_NAME = col_integer(),
+                                            FOCI_GRID = col_character(),
+                                            DATE = col_date(),
+                                            LAT = col_double(),
+                                            LON = col_double(),
+                                            DEPTH_BOTTOM = col_integer(),
+                                            DEPTH = col_integer(),
+                                            TEMPERATURE1 = col_double(),
+                                            SALINITY1 = col_double()))%>%
+  dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID,
+                DATE, LAT, LON, DEPTH_BOTTOM, DEPTH,
+                TEMPERATURE1, SALINITY1)
+
+filter_gak <- gak_data%>%
+  dplyr::filter(DATE >= min(lubridate::month(fc_data$DATE)) &
+                DATE <= max(lubridate::month(fc_data$DATE)))
+
+# Plot information for cruise report ------------------------------------------
+plot_colors <- c("#1565C0","#b92b27")
+names(plot_colors) <- c("SALINITY1", "TEMPERATURE1")
+
+plot_data <- fc_data%>% dplyr::select(STATION_NAME, HAUL_NAME,
+                                               DEPTH, TEMPERATURE1,
+                                               SALINITY1,
+                                               DIRECTORY)%>%
+  tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
+               remove = FALSE)%>%
+  tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
+  dplyr::group_by(DEPTH, TYPE)%>%
+# Calculates mean and 95% confidence intervals for plot -----------------------
+dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
+                 CI_95 = mean(MEASURMENT, na.rm = TRUE) +
+                   qnorm(0.975)*sd(MEASURMENT,
+                                   na.rm = TRUE)/sqrt(length(MEASURMENT)),
+                 CI_5 = mean(MEASURMENT, na.rm = TRUE) -
+                   qnorm(0.975)*sd(MEASURMENT,
+                                   na.rm = TRUE)/sqrt(length(MEASURMENT)))%>%
+  dplyr::filter(!is.na(MEAN))%>%
+  dplyr::filter(!is.na(CI_95))%>%
+  dplyr::filter(!is.na(CI_5))
+
+
+ts_plot <- ggplot2::ggplot(plot_data)+
+  ggplot2::geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
+                               color = TYPE),fatten = 6, alpha = 0.6)+
+  ggplot2::scale_color_manual(values = plot_colors)+
+  ggplot2::scale_fill_manual(values = plot_colors)+
+  ggplot2::coord_flip()+
+  ggplot2::theme_bw()+
+  ggplot2::theme(
+    axis.text.y = element_text(face = "bold", size = 12),
+    axis.text.x = element_text(face = "bold", size = 12),
+    axis.title.x  = element_text(face = "bold", size = 14),
+    axis.title.y  = element_text(face = "bold", size = 14),
+    title = element_text(face = "bold", size = 18),
+    strip.background = element_blank(),
+    strip.text = element_blank(),
+    legend.position = "none")+
+  ggplot2::xlab(label = "Depth [m]")+
+  ggplot2::ylab(label = expression(bold(paste("Salinity[PSU]",
+                                              "\t\t\t\t\t\t\t\t\t\t\t",
+                                              paste("Temperature",
+                                                    "["~degree~C, "]"))))) +
+  ggplot2::facet_wrap(~ TYPE, nrow = 1, scales = "free_x")
+
+# Write plot to file ----------------------------------------------------------
+
+grDevices::png(filename = name_ts_plot, width = 500, height = 600,
+               units = "px", bg = "transparent")
+
+print(ts_plot)
+
+grDevices::dev.off()
+
+}
