@@ -23,7 +23,8 @@ Depends: R (>= 3.5.1),
          tidyr (>= 0.8.1),
          knitr (>= 1.20),
          markdown (>= 0.8),
-         htmltools (>= 0.3.6)
+         htmltools (>= 0.3.6),
+         dataone (>= 2.1.1)
 License: CC0
 Encoding: UTF-8
 LazyData: true
@@ -40,7 +41,8 @@ Imports: sf(>= 0.6.3),
          tidyr (>= 0.8.1),
          knitr (>= 1.20),
          markdown (>= 0.8),
-         htmltools (>= 0.3.6)
+         htmltools (>= 0.3.6),
+         dataone (>= 2.1.1)
 BugReports: https://gitlab.afsc.noaa.gov/Nissa.Ferm/FastrCAT/issues
 RoxygenNote: 6.1.0
 Suggests: 
