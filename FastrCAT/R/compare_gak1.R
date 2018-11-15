@@ -1,9 +1,6 @@
 #' @title Compare Temperature and Salinity to GAK1 line
 
 
-
-library(dataone)
-
 compare_gak1 <- function(current_path, foci_header = TRUE){
 
 # node object for production level dataone environment-------------------------
