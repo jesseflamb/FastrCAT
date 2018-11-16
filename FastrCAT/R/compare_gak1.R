@@ -170,14 +170,14 @@ fc_plot_data <- fc_data%>% dplyr::select(STATION_NAME, HAUL_NAME,
 
 
 ts_plot <- ggplot2::ggplot()+
-  geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95),
+  ggplot2::geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95),
               alpha = 0.5,color = "gray", fill = "gray",
               data = gak_plot_data_all)+
-  geom_point(aes(-(DEPTH), MEAN), shape = 21, size = 3, color = 'gray',
+  ggplot2::geom_point(aes(-(DEPTH), MEAN), shape = 21, size = 3, color = 'gray',
              fill = "gray", data = gak_plot_data_year)+
-  geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
+  ggplot2::geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
               alpha = 0.5, data = fc_plot_data)+
-  geom_point(aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
+  ggplot2::geom_point(aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
              alpha = 0.8, data = fc_plot_data)+
   ggplot2::scale_color_manual(values = plot_colors)+
   ggplot2::scale_fill_manual(values = plot_colors)+
