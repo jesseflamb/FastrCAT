@@ -22,3 +22,4 @@ subsets <- mt_batch_subset(df = df,
 #https://khufkens.github.io/MODISTools/
 
 #MODIS Aqua Level 3 SST Thermal IR Daily 4km Daytime v2014.0
+#https://modis.gsfc.nasa.gov/tools/index.php
