@@ -14,7 +14,9 @@ subsets <- mt_batch_subset(df = df,
                              end = "2004-02-01")
 
 
-
+#error Error in checkForRemoteErrors(val) :
+#2 nodes produced errors; first error: second argument must be a list
+#found issues but no comments. Need to post issue on github
 
 #   server <- "https://modis.ornl.gov/rst/"  The MODIS api's
 # end_point <- "api/v1/products"
