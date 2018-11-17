@@ -7,11 +7,11 @@ df$lon <- -110
 
 # test batch download
 subsets <- mt_batch_subset(df = df,
-                           product = "MOD11A2",
-                           band = "LST_Day_1km",
-                           internal = TRUE,
-                           start = "2004-01-01",
-                           end = "2004-02-01")
+                             product = "MOD11A2",
+                             band = "LST_Day_1km",
+                             internal = TRUE,
+                             start = "2004-01-01",
+                             end = "2004-02-01")
 
 
 
