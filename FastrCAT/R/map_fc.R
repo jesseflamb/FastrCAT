@@ -9,7 +9,7 @@
 #' @param map_type Determines the type of map which will be returned. The
 #' default map is a station map. Map types are Station: returns map of
 #' station locations, Sample intensity: returns a map of sampling intesity
-#' for each 0.5 decimal degrees which is around 50km for the regions that are
+#' for each 0.3 decimal degrees which is around 30km for the regions that are
 #' sampled hexagon, Salinity: returns an
 #' map using a least-squares gridding method for the average of the depth_range
 #' specified. If depth_range remains as NA, then the entire water column will
@@ -95,12 +95,13 @@ station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21,
                                     data = station_map)+
                 ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
                                          size = 5, color = "black",
-                                         data = station_map)+
+                                         data = station_map)
 
 # Sampling Intensity ----------------------------------------------------------
 
-intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5,
-                                    data = station_map)+
+intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.3, alpha = 0.8,
+                                      data = station_map)+
+                  ggplot2::scale_fill_viridis_c(option = "A")+
                   ggplot2::scale_color_viridis_c(option = "A")+
 
 # Salinity --------------------------------------------------------------------
@@ -115,7 +116,17 @@ salt_data <- fc_data%>%
   dplyr::group_by(LAT,LON)%>%
   dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
 
-gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov, x = salt_data, d = 1)
+gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
+                                 x = -(salt_data$LON), y = salt_data$LAT,
+                                 z = salt_data$SALINITY1,d = 1)
+
+gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(salt_data$LAT,na.rm = TRUE),
+                               yu = max(salt_data$LAT, na.rm = TRUE),
+                               xl = min(salt_data$LON, na.rm = TRUE),
+                               xu = max(salt_data$LON, na.rm = TRUE),
+                               n = 200)
+
+
 
 salinity_plot <-
 
@@ -155,7 +166,8 @@ fc_map <- ggplot2::ggplot()+
   ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                               unit_category = "metric")+
   ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-  map_choice+
+
+  #map_choice+
   ggplot2::theme_bw()+
   ggplot2::xlab(label = "Longitude")+
   ggplot2::ylab(label = "Latitude")+
