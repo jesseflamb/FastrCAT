@@ -555,8 +555,10 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE){
 
 
   ts_plot <- ggplot2::ggplot(plot_data)+
-    ggplot2::geom_pointrange(aes(-(DEPTH), MEAN, ymin = CI_5, ymax = CI_95,
-                        color = TYPE),fatten = 6, alpha = 0.6)+
+    ggplot2::geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
+                         alpha = 0.5)+
+    ggplot2::geom_point(aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
+                        alpha = 0.8)+
     ggplot2::scale_color_manual(values = plot_colors)+
     ggplot2::scale_fill_manual(values = plot_colors)+
     ggplot2::coord_flip()+
