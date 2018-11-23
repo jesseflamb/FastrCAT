@@ -14,12 +14,15 @@
 #' @param GE A logical value, Returns the dataframe to the global R environment.
 #' By defulaut it is set to FALSE. Set to TRUE if you would like the data
 #' available in the global environment.
+#' @param Cruise_report A logical value set to TRUE. When TRUE a cruise report
+#' will be generated. When set to false a cruise report will not be
+#' generated.
 #' @return .csv file of all .up file data. An .html file with a cruise
 #' summary and data QAQC output.
 
 
 
-make_dataframe_fc <- function(current_path,GE = FALSE){
+make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE){
 
 # Get list of files -----------------------------------------------------------
   temp <- list.files(path = current_path, pattern = "\\.up$",
@@ -466,7 +469,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                   GEAR_NAME = as.character("CAT"),
                   NET = as.integer(0))
 
-
+# Generate the Cruise report if set to TRUE------------------------------------
+  if(Cruise_report == TRUE){
 # Make cruise summary and summary stats text ----------------------------------
   summary_fc <- summary(cruise_data_all %>%
                         select(LAT, LON, DEPTH_BOTTOM, DEPTH, PRESSURE,
@@ -725,6 +729,8 @@ make_dataframe_fc <- function(current_path,GE = FALSE){
                                output = paste(current_path, paste(cruise_id,
                                         "Cruise_Report.html", sep = "_"),
                                         sep = "/"))
+  }
+# End of Cruise report^--------------------------------------------------------
 
 # Changes date to character to avoid Excel date-time errors--------------------
   cruise_data_all$DATE <- as.character(cruise_data_all$DATE)
