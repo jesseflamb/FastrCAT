@@ -9,7 +9,8 @@
 #' @param map_type Determines the type of map which will be returned. The
 #' default map is a station map. Map types are Station: returns map of
 #' station locations, Sample intensity: returns a map of sampling intesity
-#' for each "distance measure to be determined" hexagon, Salinity: returns an
+#' for each 0.5 decimal degrees which is around 50km for the regions that are
+#' sampled hexagon, Salinity: returns an
 #' map using a least-squares gridding method for the average of the depth_range
 #' specified. If depth_range remains as NA, then the entire water column will
 #' be averaged.Temperature: returns a map using a least-squares gridding method
@@ -19,7 +20,8 @@
 #' "Temperature".
 #' @param depth_range The desired depth range for either the "Salinity" or
 #' "Temperature". If the parameter is left as NA, then the entire water
-#' column will be averages.
+#' column will be averages.Takes a two value vector, a minimum and maximum of
+#' desired depth range.
 #' @return A station map
 
 
@@ -83,11 +85,67 @@ map_title <- paste("Cruise",unique(fc_data$CRUISE), sep = " ")
 
 # Station map data if Station.haul---------------------------------------------
 
-Station_map <- fc_data %>%
+station_map <- fc_data %>%
   dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
   tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
   dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
 
+station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21,
+                                    color = "black", fill = "gray",
+                                    data = station_map)+
+                ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
+                                         size = 5, color = "black",
+                                         data = station_map)+
+
+# Sampling Intensity ----------------------------------------------------------
+
+intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5,
+                                    data = station_map)+
+                  ggplot2::scale_color_viridis_c(option = "A")+
+
+# Salinity --------------------------------------------------------------------
+
+salt_data <- fc_data%>%
+  dplyr::filter(if(is.na(depth_range)){
+    DEPTH >= min(DEPTH, na.rm = TRUE) &
+    DEPTH <= max(DEPTH, na.rm = TRUE)
+    }else{
+    DEPTH >= min(depth_range, na.rm = TRUE) &
+    DEPTH <= max(depth_range, na.rm = TRUE)})%>%
+  dplyr::group_by(LAT,LON)%>%
+  dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
+
+gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov, x = salt_data, d = 1)
+
+salinity_plot <-
+
+# Temperature -----------------------------------------------------------------
+
+temp_data <- fc_data%>%
+  dplyr::filter(if(is.na(depth_range)){
+    DEPTH >= min(DEPTH, na.rm = TRUE) &
+      DEPTH <= max(DEPTH, na.rm = TRUE)
+  }else{
+    DEPTH >= min(depth_range, na.rm = TRUE) &
+      DEPTH <= max(depth_range, na.rm = TRUE)})%>%
+  dplyr::group_by(LAT,LON)%>%
+  dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))
+
+temperature_plot <-
+
+# Determines which map selection will be used----------------------------------
+
+map_choice <- if(map_type == "Station"){
+  station_plot
+} else if(map_type == "Sample Intensity"){
+  intensity_plot
+} else if(map_type == "Salinity"){
+  salinity_plot
+} else if(map_type == "Temperature"){
+  temperature_plot
+} else{
+  warning("No such map_type name, check spelling.")
+}
 
 # map--------------------------------------------------------------------------
 
@@ -97,10 +155,7 @@ fc_map <- ggplot2::ggplot()+
   ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                               unit_category = "metric")+
   ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-  ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21, color = "black",
-                      fill = "gray", data = Station_map)+
-  ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL), size = 5,
-                     color = "black",data = Station_map)+
+  map_choice+
   ggplot2::theme_bw()+
   ggplot2::xlab(label = "Longitude")+
   ggplot2::ylab(label = "Latitude")+
