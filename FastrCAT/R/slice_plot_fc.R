@@ -16,7 +16,8 @@
 
 slice_plot <- function(fastcat_data, plot_type, slice){
 
-
+# Get cruise name -------------------------------------------------------------
+  cruise_name <- unique(fastcat_data$CRUISE)
 # Which: temperature of salinity ----------------------------------------------
 
   measurment <- if(plot_type == "temperature"){
@@ -118,9 +119,12 @@ ggplot()+
   geom_raster(aes(LAT, -(DEPTH), fill = Z), data = idw_grd)+
   geom_ribbon(aes(x = LAT, ymin = -(max(DEPTH_BOTTOM, na.rm = TRUE)+10),
                   ymax = -(DEPTH_BOTTOM)), data = range_filter)+
-  geom_point(aes(LAT,-(DEPTH)), shape = 21, size = 1, color = "white", data = point_vals_bot)+
-  geom_point(aes(LAT,-(DEPTH)), shape = 21, size = 1, color = "white", data = point_vals_top)+
+  geom_point(aes(LAT,-(DEPTH)), shape = 21, size = 1, color = "orange", data = point_vals_bot)+
+  geom_point(aes(LAT,-(DEPTH)), shape = 21, size = 1, color = "orange", data = point_vals_top)+
   scale_fill_gradientn(colors = plot_color, name = legend_name)+
-  theme_bw()
+  theme_bw()+
+  ylab(label = "Depth m")+
+  xlab(label = "Latitude")+
+  ggtitle(label = cruise_name, subtitle = slice)
 
 }
