@@ -3,7 +3,7 @@
 time_data <- ALL_BON
 
 slice <- "Line 8"
-plot_type <- "temperature"
+plot_type <- "salinity"
 
 range_filter <- if(slice == "Line 8"){
   time_data %>%
@@ -21,10 +21,11 @@ range_filter <- if(slice == "Line 8"){
 
 
 plot_data <- range_filter %>%
+  filter(SALINITY1 >= 5)%>%
   filter(month(DATE) %in% c(4,5))%>%
   filter(DEPTH <= 100)%>%
   group_by(year(DATE), DEPTH)%>%
-  summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
+  summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
 
 # color palletes for salinity and temperature are derived from the oce
 # package. These colors are standardized for oceanographic plots.--------------
