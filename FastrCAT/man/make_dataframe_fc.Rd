@@ -4,7 +4,7 @@
 \alias{make_dataframe_fc}
 \title{Create a Dataframe from .up files}
 \usage{
-make_dataframe_fc(current_path, GE = FALSE)
+make_dataframe_fc(current_path, GE = FALSE, Cruise_report = TRUE)
 }
 \arguments{
 \item{current_path}{The path to directory where all .up files
@@ -13,6 +13,10 @@ are located for a cruise.}
 \item{GE}{A logical value, Returns the dataframe to the global R environment.
 By defulaut it is set to FALSE. Set to TRUE if you would like the data
 available in the global environment.}
+
+\item{Cruise_report}{A logical value set to TRUE. When TRUE a cruise report
+will be generated. When set to false a cruise report will not be
+generated.}
 }
 \value{
 .csv file of all .up file data. An .html file with a cruise
