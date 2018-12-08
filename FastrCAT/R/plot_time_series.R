@@ -7,10 +7,6 @@
 #' @param hist_data Supply the path and .csv file name of the historical data
 #' in quotations. The historical data must be in the format created by
 #' the FastrCAT function make_dataframe_fc.
-#' @param fastcat_data An optional argument if you want to add the current years
-#' fastcat data. Supply the path and .csv file name to the current years
-#' fastcat data. This must be in the format created by the FastrCAT function
-#' make_dataframe_fc.
 #' @param core_stations There are three core areas for the Gulf of Alaska which
 #' have been regularly sampled and are representative of the Gulf of Alaska.
 #' Core areas are all in bottom depth at or greater than 100 and less than 150
@@ -22,37 +18,55 @@
 #' sampled, with a bounding box of '55.5, -157.59, 56.5, -157.46'.
 #' @param plot_type will accept on of two quoted characters "temperature" or
 #' "salinity".
+#' @param fastcat_data An optional argument if you want to add the current years
+#' fastcat data. Supply the path and .csv file name to the current years
+#' fastcat data. This must be in the format created by the FastrCAT function
+#' make_dataframe_fc.
 #' @return A depth by year tile plot of temperature or salinity. The plot will
 #' be written to the folder designated by the historical data file path. The
 #' plot will be in .png format.
 
 
-plot_time_series <- function(hist_data, fastcat_data = NULL,
-                             core_stations, plot_type){
+plot_time_series <- function(hist_data,
+                             core_stations, plot_type, fastcat_data = FALSE){
 
-old_data <- read_csv(hist_data)
-fastcat_data <- read_csv(fastcat_data)
+old_data <- read_csv(hist_data, col_types = cols_only(
+                                TIME = col_time(format = ""),
+                                DEPTH_BOTTOM = col_integer(),
+                                DEPTH = col_integer(),
+                                TEMPERATURE1 = col_double(),
+                                SALINITY1 = col_double(),
+                                CONDUCTIVITY1 = col_skip()))
 
-time_data <- if(is.null(fastcat_data)){
-  old_data
-} else if (!is.null(fastcat_data)){
-  bind_rows(old_data, fastcat_data)
+
+time_data <- if(fastcat_data == FALSE){
+  time_data <- old_data
+} else if (fastcat_data == TRUE){
+
+  time_data <- fastcat_data <- read_csv(fastcat_data, col_types = cols_only(
+    TIME = col_time(format = ""),
+    DEPTH_BOTTOM = col_integer(),
+    DEPTH = col_integer(),
+    TEMPERATURE1 = col_double(),
+    SALINITY1 = col_double(),
+    CONDUCTIVITY1 = col_skip()))%>%
+    dplyr::bind_rows(old_data)
 }
 
 
 range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
   time_data %>%
-    filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
-    filter(LON >= -155.2673 & LON <= -154.7725)
+    dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
+    dplyr::filter(LON >= -155.2673 & LON <= -154.7725)
 } else if (core_stations == "Line 8 FOX"){ # 4 Stations
   time_data %>%
-    filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
-    filter(LON >= -155.2 & LON <= -154.85)
+    dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
+    dplyr::filter(LON >= -155.2 & LON <= -154.85)
 } else if(core_stations == "Semidi"){ # Center of Semidi polygon 5 Stations
   time_data %>%
-    filter(LAT >= 55.5 & LAT <= 56.5)%>%
-    filter(LON >= -157.59 & LON <= -157.46)%>%
-    filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
+    dplyr::filter(LAT >= 55.5 & LAT <= 56.5)%>%
+    dplyr::filter(LON >= -157.59 & LON <= -157.46)%>%
+    dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
 }
 
 
@@ -60,18 +74,18 @@ range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
 plot_data <- if(plot_type == "temperature"){
 
   range_filter %>%
-    filter(month(DATE) %in% c(5,6))%>%
-    filter(DEPTH <= 100 & DEPTH > 0)%>%
-    group_by(year(DATE), DEPTH)%>%
-    summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
+    dplyr::filter(month(DATE) %in% c(5,6))%>%
+    dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
+    dplyr::group_by(year(DATE), DEPTH)%>%
+    dplyr::summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
 } else if(plot_type == "salinity"){
 
   range_filter %>%
     #filter(SALINITY1 > 15)%>% # Filter out remaining bad historical salinities
-    filter(month(DATE) %in% c(5,6))%>%
-    filter(DEPTH <= 100 & DEPTH > 0)%>%
-    group_by(year(DATE), DEPTH)%>%
-    summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
+    dplyr::filter(month(DATE) %in% c(5,6))%>%
+    dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
+    dplyr::group_by(year(DATE), DEPTH)%>%
+    dplyr::summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
 }
 
 
