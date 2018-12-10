@@ -30,14 +30,16 @@
 plot_time_series <- function(hist_data,
                              core_stations, plot_type, fastcat_data = FALSE){
 
-old_data <- readr::read_csv(hist_data, col_types = cols_only(
-                                TIME = col_time(format = ""),
-                                DEPTH_BOTTOM = col_integer(),
-                                DEPTH = col_integer(),
-                                TEMPERATURE1 = col_double(),
-                                SALINITY1 = col_double(),
-                                LAT = col_double(),
-                                LON = col_double()))
+fast_col_types <- readr::cols_only(
+                                   DATE = readr::col_date(format = "%Y-%m-%d"),
+                                   DEPTH_BOTTOM = readr::col_integer(),
+                                   DEPTH = readr::col_integer(),
+                                   TEMPERATURE1 = readr::col_double(),
+                                   SALINITY1 = readr::col_double(),
+                                   LAT = readr::col_double(),
+                                   LON = readr::col_double())
+
+old_data <- readr::read_csv(hist_data, col_types = fast_col_types)
 
 
 time_data <- if(fastcat_data == FALSE){
@@ -45,14 +47,7 @@ time_data <- if(fastcat_data == FALSE){
 } else if (fastcat_data == TRUE){
 
   time_data <- fastcat_data <- readr::read_csv(fastcat_data,
-                                        col_types = cols_only(
-                                        TIME = col_time(format = ""),
-                                        DEPTH_BOTTOM = col_integer(),
-                                        DEPTH = col_integer(),
-                                        TEMPERATURE1 = col_double(),
-                                        SALINITY1 = col_double(),
-                                        LAT = col_double(),
-                                        LON = col_double()))%>%
+                                        col_types = fast_col_types)%>%
                                         dplyr::bind_rows(old_data)
 }
 
