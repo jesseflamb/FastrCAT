@@ -1,7 +1,10 @@
 #' @title Time Series Plots
 #' @description Creates either temperature or salinity plots of core EcoFOCI
 #' stations in the Gulf of Alaska. Each plot displays the average temperature
-#' or salinity for each meter of depth of the core stations for each year.
+#' or salinity for each meter of depth of the core stations for each year for
+#' the months when peak sampling of these regions occured. Line 8 is most
+#' commonly sampled in May and June, Spring, whereas the Semidi region is
+#' sampled in
 #' Post 2010, these core stations were only sampled in odd numbered years. In
 #' the future more core areas will be added.
 #' @param hist_data Supply the path and .csv file name of the historical data
@@ -11,11 +14,12 @@
 #' have been regularly sampled and are representative of the Gulf of Alaska.
 #' Core areas are all in bottom depth at or greater than 100 and less than 150
 #' meters. Salintiy or temperature data from the surface to 100m will be shown.
-#' core_stations are as follows: "Line 8 FOX", "Line 8", and "Semidi".
+#' core_stations are as follows: "Line 8 FOX", "Line 8", "Semidi Spring" and
+#' "Semidi Summer".
 #' Line 8 FOX is a set of six stations  with a bounding box of `57.52, -155.2,
 #' 57.72, -154.85`. Line 8 are the 4 core stations of Line 8 FOX. Semidi are
-#' 5 stations centrally located in the Semidi area and have been consistently
-#' sampled, with a bounding box of '55.5, -157.59, 56.5, -157.46'.
+#' 6- 8 stations centrally located in the Semidi area and have been consistently
+#' sampled, with a bounding box of '55.1, -158.5, 55.9, -158.0'.
 #' @param plot_type will accept on of two quoted characters "temperature" or
 #' "salinity".
 #' @param fastcat_data An optional argument if you want to add the current years
@@ -24,7 +28,8 @@
 #' make_dataframe_fc.
 #' @return A depth by year tile plot of temperature or salinity. The plot will
 #' be written to the folder designated by the historical data file path. The
-#' plot will be in .png format.
+#' plot will be in .png format. It should be noted that the plot throws out
+#' the 0 depth value. 0 depth can and has been problematic for fastcat data.
 
 
 plot_time_series <- function(hist_data,
@@ -55,15 +60,25 @@ time_data <- if(fastcat_data == FALSE){
 range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
   time_data %>%
     dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
-    dplyr::filter(LON >= -155.2673 & LON <= -154.7725)
+    dplyr::filter(LON >= -155.2673 & LON <= -154.7725)%>%
+    dplyr::filter(month(DATE) %in% c(5,6)) #May and June
 } else if (core_stations == "Line 8 FOX"){ # 4 Stations
   time_data %>%
     dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
-    dplyr::filter(LON >= -155.2 & LON <= -154.85)
-} else if(core_stations == "Semidi"){ # Center of Semidi polygon 5 Stations
+    dplyr::filter(LON >= -155.2 & LON <= -154.85)%>%
+    dplyr::filter(month(DATE) %in% c(5,6)) #May and June
+} else if(core_stations == "Semidi Spring"){ # .5 x 1 degree area
   time_data %>%
-    dplyr::filter(LAT >= 55.5 & LAT <= 56.5)%>%
-    dplyr::filter(LON >= -157.59 & LON <= -157.46)%>%
+    dplyr::filter(LAT >= 55.2 & LAT <= 57.2)%>%
+    dplyr::filter(LON >= -159 & LON <= -158)%>%
+    dplyr::filter(month(DATE) %in% c(5,6))%>% #May and June
+    dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
+
+} else if(core_stations == "Semidi Summer"){
+  time_data %>%
+    dplyr::filter(LAT >= 55.2 & LAT <= 57.2)%>%
+    dplyr::filter(LON >= -159 & LON <= -158)%>%
+    dplyr::filter(month(DATE) %in% c(8,9))%>% #August and September
     dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
 }
 
@@ -72,15 +87,13 @@ range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
 plot_data <- if(plot_type == "temperature"){
 
   range_filter %>%
-    dplyr::filter(month(DATE) %in% c(5,6))%>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
     dplyr::group_by(year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
+
 } else if(plot_type == "salinity"){
 
   range_filter %>%
-    #filter(SALINITY1 > 15)%>% # Filter out remaining bad historical salinities
-    dplyr::filter(month(DATE) %in% c(5,6))%>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
     dplyr::group_by(year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
