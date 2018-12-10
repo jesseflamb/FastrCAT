@@ -16,11 +16,12 @@ the FastrCAT function make_dataframe_fc.}
 have been regularly sampled and are representative of the Gulf of Alaska.
 Core areas are all in bottom depth at or greater than 100 and less than 150
 meters. Salintiy or temperature data from the surface to 100m will be shown.
-core_stations are as follows: "Line 8 FOX", "Line 8", and "Semidi".
+core_stations are as follows: "Line 8 FOX", "Line 8", "Semidi Spring" and
+"Semidi Summer".
 Line 8 FOX is a set of six stations  with a bounding box of `57.52, -155.2,
 57.72, -154.85`. Line 8 are the 4 core stations of Line 8 FOX. Semidi are
-5 stations centrally located in the Semidi area and have been consistently
-sampled, with a bounding box of '55.5, -157.59, 56.5, -157.46'.}
+6- 8 stations centrally located in the Semidi area and have been consistently
+sampled, with a bounding box of '55.1, -158.5, 55.9, -158.0'.}
 
 \item{plot_type}{will accept on of two quoted characters "temperature" or
 "salinity".}
@@ -33,12 +34,16 @@ make_dataframe_fc.}
 \value{
 A depth by year tile plot of temperature or salinity. The plot will
 be written to the folder designated by the historical data file path. The
-plot will be in .png format.
+plot will be in .png format. It should be noted that the plot throws out
+the 0 depth value. 0 depth can and has been problematic for fastcat data.
 }
 \description{
 Creates either temperature or salinity plots of core EcoFOCI
 stations in the Gulf of Alaska. Each plot displays the average temperature
-or salinity for each meter of depth of the core stations for each year.
+or salinity for each meter of depth of the core stations for each year for
+the months when peak sampling of these regions occured. Line 8 is most
+commonly sampled in May and June, Spring, whereas the Semidi region is
+sampled in
 Post 2010, these core stations were only sampled in odd numbered years. In
 the future more core areas will be added.
 }
