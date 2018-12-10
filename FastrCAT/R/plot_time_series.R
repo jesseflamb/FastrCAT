@@ -1,15 +1,17 @@
-#' @title Time Series Plots
+#' @title GOA Time Series Plots
 #' @description Creates either temperature or salinity plots of core EcoFOCI
 #' stations in the Gulf of Alaska. Each plot displays the average temperature
 #' or salinity for each meter of depth of the core stations for each year for
-#' the months when peak sampling of these regions occured. Line 8 is most
-#' commonly sampled in May and June, Spring, whereas the Semidi region is
-#' sampled in
-#' Post 2010, these core stations were only sampled in odd numbered years. In
-#' the future more core areas will be added.
+#' the months when peak sampling of these regions occured. Line 8 and Semidi
+#' area are most commonly sampled in May and June, which is considered
+#' Spring. Summer sampling in the Gulf of Alaska has been less frequent and
+#' starts in the early 2000's. This summer sampling is in the Semidi core
+#' area, summer is considered August and September.Post 2010, these core
+#' stations were only sampled in odd numbered years. In the future more core
+#' areas will be added.
 #' @param hist_data Supply the path and .csv file name of the historical data
 #' in quotations. The historical data must be in the format created by
-#' the FastrCAT function make_dataframe_fc.
+#' the FastrCAT::make_dataframe_fc.
 #' @param core_stations There are three core areas for the Gulf of Alaska which
 #' have been regularly sampled and are representative of the Gulf of Alaska.
 #' Core areas are all in bottom depth at or greater than 100 and less than 150
@@ -26,14 +28,17 @@
 #' fastcat data. Supply the path and .csv file name to the current years
 #' fastcat data. This must be in the format created by the FastrCAT function
 #' make_dataframe_fc.
+#' @param anomaly An optional argument if you want the anomaly of the plot_type
+#' selected. This argument is set to FALSE, when set to TRUE then the anomaly
+#' will be plotted. The anomoly is calculated using the ...something equation.
 #' @return A depth by year tile plot of temperature or salinity. The plot will
 #' be written to the folder designated by the historical data file path. The
 #' plot will be in .png format. It should be noted that the plot throws out
 #' the 0 depth value. 0 depth can and has been problematic for fastcat data.
 
 
-plot_time_series <- function(hist_data,
-                             core_stations, plot_type, fastcat_data = FALSE){
+plot_time_series <- function(hist_data, core_stations, plot_type,
+                             fastcat_data = FALSE, anomaly = FALSE){
 
 fast_col_types <- readr::cols_only(
                                    DATE = readr::col_date(format = "%Y-%m-%d"),
@@ -86,17 +91,27 @@ range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
 
 plot_data <- if(plot_type == "temperature"){
 
+  if(anomaly == FALSE){
+
   range_filter %>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
     dplyr::group_by(year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
+  }else if(anomaly == TRUE){
+    # place anomaly equation here
+  }
 
 } else if(plot_type == "salinity"){
+
+  if(anomaly == FALSE){
 
   range_filter %>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
     dplyr::group_by(year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
+  }else if(anomaly == TRUE){
+    # place anomaly equation here
+  }
 }
 
 
