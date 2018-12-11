@@ -20,9 +20,9 @@
 #' "Temperature".
 #' @param depth_range The desired depth range for either the "Salinity" or
 #' "Temperature". If the parameter is left as NA, then the entire water
-#' column will be averages.Takes a two value vector, a minimum and maximum of
+#' column will be averaged.Takes a two value vector, a minimum and maximum of
 #' desired depth range.
-#' @return A station map
+#' @return A map of the desired type and depth range for a single cruise.
 
 
 
@@ -75,7 +75,7 @@ fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
 
 # Map title--------------------------------------------------------------------
 map_dir_name <- paste(current_path, paste(unique(fc_data$CRUISE),
-                                          "_Station_map",".png",sep = ""),
+                                          "_" map_type,".png",sep = ""),
                                     sep = "/")
 
 map_title <- paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
@@ -220,7 +220,7 @@ print(fc_map)
 
 dev.off()
 
-}
+ }
 
 
 
