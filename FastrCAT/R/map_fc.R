@@ -35,7 +35,7 @@ fc_data <- readr::read_csv(list.files(path = current_path,
                                       ignore.case = TRUE,
                                       include.dirs = TRUE,
                                       full.names = TRUE),
-                    col_types = cols(CRUISE = col_character(),
+                    col_types = cols_only(CRUISE = col_character(),
                                      STATION_NAME = col_integer(),
                                      HAUL_NAME = col_integer(),
                                      FOCI_GRID = col_character(),
@@ -45,10 +45,7 @@ fc_data <- readr::read_csv(list.files(path = current_path,
                                      DEPTH_BOTTOM = col_integer(),
                                      DEPTH = col_integer(),
                                      TEMPERATURE1 = col_double(),
-                                     SALINITY1 = col_double()))%>%
-            dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID,
-                          DATE, LAT, LON, DEPTH_BOTTOM, DEPTH,
-                          TEMPERATURE1, SALINITY1)
+                                     SALINITY1 = col_double()))
 
 # bring in the shape files to make the basemap --------------------------------
 
@@ -90,7 +87,7 @@ station_map <- fc_data %>%
   tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
   dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
 
-station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21,
+station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 1, shape = 21,
                                     color = "black", fill = "gray",
                                     data = station_map)+
                 ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
@@ -99,10 +96,15 @@ station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21,
 
 # Sampling Intensity ----------------------------------------------------------
 
-intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.3, alpha = 0.8,
+intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.8,
                                       data = station_map)+
                   ggplot2::scale_fill_viridis_c(option = "A")+
-                  ggplot2::scale_color_viridis_c(option = "A")+
+                  ggplot2::scale_color_viridis_c(option = "A")
+
+intensity_color <- c("#132037","#22325E", "#214985", "#136495", "#107EA0",
+                     "#2E97A8", "#65ACAE", "#95BEBC", "#C0D4CF", "#E8EDE3",
+                     "#F3EEBB", "#DBD186", "#BEB955", "#9AA62E", "#709519",
+                     "#43821B", "#1B6E24", "#135526", "#1A3C1C", "#17240A")
 
 # Salinity --------------------------------------------------------------------
 
@@ -161,13 +163,16 @@ map_choice <- if(map_type == "Station"){
 # map--------------------------------------------------------------------------
 
 fc_map <- ggplot2::ggplot()+
+  ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.8,
+                    data = station_map)+
+  ggplot2::scale_fill_gradientn(colors = intensity_color)+
+  ggplot2::scale_color_gradientn(colors = intensity_color)+
+
   ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
   ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
   ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                               unit_category = "metric")+
   ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-
-  #map_choice+
   ggplot2::theme_bw()+
   ggplot2::xlab(label = "Longitude")+
   ggplot2::ylab(label = "Latitude")+
