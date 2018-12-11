@@ -76,112 +76,122 @@ fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
 # Map title--------------------------------------------------------------------
 map_dir_name <- paste(current_path, paste(unique(fc_data$CRUISE),
                                           "_Station_map",".png",sep = ""),
-                      sep = "/")
+                                    sep = "/")
 
-map_title <- paste("Cruise",unique(fc_data$CRUISE), sep = " ")
+map_title <- paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
 
-# Station map data if Station.haul---------------------------------------------
+# Dataframes and calculations for each map_type -------------------------------
 
-station_map <- fc_data %>%
-  dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
-  tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
-  dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
+map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
-station_plot <- ggplot2::geom_point(aes(LON, LAT), size = 1, shape = 21,
-                                    color = "black", fill = "gray",
-                                    data = station_map)+
-                ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
-                                         size = 5, color = "black",
-                                         data = station_map)
+  fc_data %>%
+    dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, LAT, LON)%>%
+    tidyr::unite(STATION_HAUL, STATION_NAME, HAUL_NAME, sep = ".")%>%
+    dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
 
-# Sampling Intensity ----------------------------------------------------------
+} else if(map_type == "Salinity"){
 
-intensity_plot <- ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.8,
-                                      data = station_map)+
-                  ggplot2::scale_fill_viridis_c(option = "A")+
-                  ggplot2::scale_color_viridis_c(option = "A")
-
-intensity_color <- c("#132037","#22325E", "#214985", "#136495", "#107EA0",
-                     "#2E97A8", "#65ACAE", "#95BEBC", "#C0D4CF", "#E8EDE3",
-                     "#F3EEBB", "#DBD186", "#BEB955", "#9AA62E", "#709519",
-                     "#43821B", "#1B6E24", "#135526", "#1A3C1C", "#17240A")
-
-# Salinity --------------------------------------------------------------------
-
-salt_data <- fc_data%>%
-  dplyr::filter(if(is.na(depth_range)){
-    DEPTH >= min(DEPTH, na.rm = TRUE) &
-    DEPTH <= max(DEPTH, na.rm = TRUE)
+  salt_data <- fc_data%>%
+    dplyr::filter(if(is.na(depth_range)){
+      DEPTH >= min(DEPTH, na.rm = TRUE) &
+        DEPTH <= max(DEPTH, na.rm = TRUE)
     }else{
-    DEPTH >= min(depth_range, na.rm = TRUE) &
-    DEPTH <= max(depth_range, na.rm = TRUE)})%>%
-  dplyr::group_by(LAT,LON)%>%
-  dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
+      DEPTH >= min(depth_range, na.rm = TRUE) &
+        DEPTH <= max(depth_range, na.rm = TRUE)})%>%
+    dplyr::group_by(LAT,LON)%>%
+    dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
 
-gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
-                                 x = -(salt_data$LON), y = salt_data$LAT,
-                                 z = salt_data$SALINITY1,d = 1)
+  gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
+                                   x = -(salt_data$LON), y = salt_data$LAT,
+                                   z = salt_data$SALINITY1,d = 1)
 
-gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(salt_data$LAT,na.rm = TRUE),
-                               yu = max(salt_data$LAT, na.rm = TRUE),
-                               xl = min(salt_data$LON, na.rm = TRUE),
-                               xu = max(salt_data$LON, na.rm = TRUE),
-                               n = 200)
+  gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(salt_data$LAT,na.rm = TRUE),
+                                 yu = max(salt_data$LAT, na.rm = TRUE),
+                                 xl = min(salt_data$LON, na.rm = TRUE),
+                                 xu = max(salt_data$LON, na.rm = TRUE),
+                                 n = 200)
 
 
+} else if(map_type == "Temperature"){
 
-salinity_plot <-
+  temp_data <- fc_data%>%
+    dplyr::filter(if(is.na(depth_range)){
+      DEPTH >= min(DEPTH, na.rm = TRUE) &
+        DEPTH <= max(DEPTH, na.rm = TRUE)
+    }else{
+      DEPTH >= min(depth_range, na.rm = TRUE) &
+        DEPTH <= max(depth_range, na.rm = TRUE)})%>%
+    dplyr::group_by(LAT,LON)%>%
+    dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))
 
-# Temperature -----------------------------------------------------------------
+} else{
+  warning("No such map_type name, check spelling.")
+}
 
-temp_data <- fc_data%>%
-  dplyr::filter(if(is.na(depth_range)){
-    DEPTH >= min(DEPTH, na.rm = TRUE) &
-      DEPTH <= max(DEPTH, na.rm = TRUE)
-  }else{
-    DEPTH >= min(depth_range, na.rm = TRUE) &
-      DEPTH <= max(depth_range, na.rm = TRUE)})%>%
-  dplyr::group_by(LAT,LON)%>%
-  dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))
 
-temperature_plot <-
-
-# Determines which map selection will be used----------------------------------
+# Plot object by map_type to add to map ---------------------------------------
 
 map_choice <- if(map_type == "Station"){
-  station_plot
+
+  ggplot2::ggplot()+
+    ggplot2::geom_point(aes(LON, LAT), size = 1, shape = 21,
+                                      color = "black", fill = "gray",
+                                      data = station_map)#+
+    #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
+                             #size = 5, color = "black",
+                             #data = station_map)
+
 } else if(map_type == "Sample Intensity"){
-  intensity_plot
+
+  intensity_color <- c("#013565", "#1C3983", "#3C3E87",
+                       "#524685", "#664D83", "#785383", "#8C5A82", "#A05F7F",
+                       "#B66478", "#CC686D", "#E0705D", "#EF7B4C", "#F78C41",
+                       "#FAA13D", "#F9B642", "#F5CD4D", "#EFE35B", "#E5FA6A")
+
+  ggplot2::ggplot()+
+    ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.9,
+                      data = station_map)+
+    ggplot2::scale_fill_gradientn(colors = intensity_color,
+                                  breaks = seq(1,10, by = 2),
+                                  labels = seq(1,10, by = 2))+
+    ggplot2::scale_color_gradientn(colors = intensity_color,
+                                   breaks = seq(1,10, by = 2),
+                                   labels = seq(1,10, by = 2))
+
 } else if(map_type == "Salinity"){
-  salinity_plot
+
+  salinity_color <- c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F", "#0E5E8B",
+                      "#1A6989", "#267488", "#318088", "#3A8B88", "#439787", "#4BA385",
+                      "#56AF81", "#64BA7B", "#77C574", "#91CF6C", "#B0D66C", "#CCDE78",
+                      "#E6E58A", "#FEEEA0")
+
 } else if(map_type == "Temperature"){
-  temperature_plot
+
+  temperature_color <- c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87", "#524685",
+                         "#664D83", "#785383", "#8C5A82", "#A05F7F", "#B66478", "#CC686D",
+                         "#E0705D", "#EF7B4C", "#F78C41", "#FAA13D", "#F9B642", "#F5CD4D",
+                         "#EFE35B", "#E5FA6A")
 } else{
   warning("No such map_type name, check spelling.")
 }
 
 # map--------------------------------------------------------------------------
 
-fc_map <- ggplot2::ggplot()+
-  ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.8,
-                    data = station_map)+
-  ggplot2::scale_fill_gradientn(colors = intensity_color)+
-  ggplot2::scale_color_gradientn(colors = intensity_color)+
-
-  ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
-  ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
-  ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
+fc_map <- map_choice +
+              ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
+              ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
+              ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                               unit_category = "metric")+
-  ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-  ggplot2::theme_bw()+
-  ggplot2::xlab(label = "Longitude")+
-  ggplot2::ylab(label = "Latitude")+
-  ggplot2::ggtitle(label = map_title)+
-  ggplot2::theme(
-    axis.text.y = element_text(face = "bold", size = 12),
-    axis.text.x = element_text(face = "bold", size = 12),
-    axis.title = element_text(face = "bold", size = 12),
-    title = element_text(face = "bold", size = 14))
+              ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
+              ggplot2::theme_bw()+
+              ggplot2::xlab(label = "Longitude")+
+              ggplot2::ylab(label = "Latitude")+
+              ggplot2::ggtitle(label = map_title)+
+              ggplot2::theme(
+                axis.text.y = element_text(face = "bold", size = 12),
+                axis.text.x = element_text(face = "bold", size = 12),
+                axis.title = element_text(face = "bold", size = 12),
+                title = element_text(face = "bold", size = 14))
 
 # write map to file-------------------------------------------------------
 png(filename = map_dir_name, width = 600, height = 600, units = "px",
