@@ -91,31 +91,20 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
 } else if(map_type == "Salinity"){
 
-  salt_data <- fc_data%>%
-    dplyr::filter(if(is.na(depth_range)){
+  fc_data %>%
+    dplyr::filter(if(is.na(depth_range[1])){
       DEPTH >= min(DEPTH, na.rm = TRUE) &
         DEPTH <= max(DEPTH, na.rm = TRUE)
-    }else{
+      }else{
       DEPTH >= min(depth_range, na.rm = TRUE) &
         DEPTH <= max(depth_range, na.rm = TRUE)})%>%
     dplyr::group_by(LAT,LON)%>%
     dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
 
-  gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
-                                   x = -(salt_data$LON), y = salt_data$LAT,
-                                   z = salt_data$SALINITY1,d = 1)
-
-  gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(salt_data$LAT,na.rm = TRUE),
-                                 yu = max(salt_data$LAT, na.rm = TRUE),
-                                 xl = min(salt_data$LON, na.rm = TRUE),
-                                 xu = max(salt_data$LON, na.rm = TRUE),
-                                 n = 200)
-
-
 } else if(map_type == "Temperature"){
 
-  temp_data <- fc_data%>%
-    dplyr::filter(if(is.na(depth_range)){
+  fc_data%>%
+    dplyr::filter(if(is.na(depth_range[1])){
       DEPTH >= min(DEPTH, na.rm = TRUE) &
         DEPTH <= max(DEPTH, na.rm = TRUE)
     }else{
@@ -134,8 +123,8 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 map_choice <- if(map_type == "Station"){
 
   ggplot2::ggplot()+
-    ggplot2::geom_point(aes(LON, LAT), size = 1, shape = 21,
-                                      color = "black", fill = "gray",
+    ggplot2::geom_point(aes(LON, LAT), size = 2, shape = 21,
+                                      color = "black", fill = "#7394b5",
                                       data = station_map)#+
     #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
                              #size = 5, color = "black",
@@ -148,22 +137,52 @@ map_choice <- if(map_type == "Station"){
                        "#B66478", "#CC686D", "#E0705D", "#EF7B4C", "#F78C41",
                        "#FAA13D", "#F9B642", "#F5CD4D", "#EFE35B", "#E5FA6A")
 
+
+  if(length(unique(station_map$CRUISE)) <= 2){
+
   ggplot2::ggplot()+
     ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.9,
                       data = station_map)+
     ggplot2::scale_fill_gradientn(colors = intensity_color,
                                   breaks = seq(1,10, by = 2),
-                                  labels = seq(1,10, by = 2))+
+                                  labels = seq(1,10, by = 2),
+                                  limits = c(1,10))+
     ggplot2::scale_color_gradientn(colors = intensity_color,
                                    breaks = seq(1,10, by = 2),
-                                   labels = seq(1,10, by = 2))
+                                   labels = seq(1,10, by = 2),
+                                   limits = c(1,10))
+  }else{
 
+    ggplot2::ggplot()+
+      ggplot2::geom_hex(aes(LON, LAT), binwidth = 1, alpha = 0.9,
+                        data = station_map)+
+      ggplot2::scale_fill_gradientn(colors = intensity_color,
+                                    breaks = seq(1,40, by = 5),
+                                    labels = seq(1,40, by = 5),
+                                    limits = c(1,40))+
+      ggplot2::scale_color_gradientn(colors = intensity_color,
+                                     breaks = seq(1,40, by = 5),
+                                     labels = seq(1,40, by = 5),
+                                     limits = c(1,40))
+
+
+  }
 } else if(map_type == "Salinity"){
 
   salinity_color <- c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F", "#0E5E8B",
                       "#1A6989", "#267488", "#318088", "#3A8B88", "#439787", "#4BA385",
                       "#56AF81", "#64BA7B", "#77C574", "#91CF6C", "#B0D66C", "#CCDE78",
                       "#E6E58A", "#FEEEA0")
+
+  gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
+                                   x = map_data$LON, y = map_data$LAT,
+                                   z = map_data$SALINITY1, d = 1)
+
+  gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(map_data$LAT,na.rm = TRUE),
+                                 yu = max(map_data$LAT, na.rm = TRUE),
+                                 xl = min(map_data$LON, na.rm = TRUE),
+                                 xu = max(map_data$LON, na.rm = TRUE),
+                                 n = 200)
 
 } else if(map_type == "Temperature"){
 
