@@ -91,7 +91,7 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
 } else if(map_type == "Salinity"){
 
-  fc_data %>%
+  MAP_IDW <- fc_data %>%
     dplyr::filter(if(is.na(depth_range[1])){
       DEPTH >= min(DEPTH, na.rm = TRUE) &
         DEPTH <= max(DEPTH, na.rm = TRUE)
@@ -99,7 +99,56 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
       DEPTH >= min(depth_range, na.rm = TRUE) &
         DEPTH <= max(depth_range, na.rm = TRUE)})%>%
     dplyr::group_by(LAT,LON)%>%
-    dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))
+    dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
+    dplyr::select(LON, LAT, SALINITY)%>%
+    dplyr::mutate_all(na.omit(.))
+
+
+  WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+  MAP_IDW_SPAT <- SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
+                                         data = MAP_IDW,
+                                         proj4string = WGS84)
+
+  x.range <- as.integer(c(min(MAP_IDW$LONG, na.rm = TRUE)-1,
+                          max(MAP_IDW$LONG, na.rm = TRUE)+1))
+
+  y.range <- as.integer(c(min(MAP_IDW$LAT, na.rm = TRUE)-1,
+                          max(MAP_IDW$LAT, na.rm = TRUE)+1))
+
+  grd <- expand.grid(x = seq(from = x.range[1], to = x.range[2], by = 0.25),
+                     y = seq(from = y.range[1], to = y.range[2], by = 0.25))
+
+  coordinates(grd) <- ~ x + y
+
+  sp::gridded(grd) <- TRUE
+
+  proj4string(grd) <- WGS84
+
+  ## test it out - this is a good way of checking that your sample points are all well within your grid. If they are not, try some different values in you r x and y ranges:
+
+
+  idw <- idw(formula = MAP_IDW$VAR ~ 1, locations = MAP_IDW_SPAT,newdata = grd,
+             idp = 3)
+
+  idw.output <- as.data.frame(idw)
+  names(idw.output)[1:3] <- c("LONG","LAT","VAR")
+
+  #Make the hull and the buffer
+
+  IDW_raster <- rasterFromXYZ(idw.output[,1:3],crs = WGS84)
+  IDW_hull <- gConvexHull(MAP_IDW_SPAT)
+  IDW_buff <- gBuffer(IDW_hull,width = .5)
+  IDW_buff_WGS84 <- spTransform(IDW_buff, WGS84)
+
+  IDW_raster_crop <- mask(IDW_raster, IDW_buff_WGS84)
+  #try this
+  Raster_crop_pt <- rasterToPoints(IDW_raster_crop, spatial = TRUE)
+
+  Out_crop <- cbind(Raster_crop_pt@coords, Raster_crop_pt@data)
+
+  names(Out_crop) <- c("LONG","LAT","VAR")
+
 
 } else if(map_type == "Temperature"){
 
@@ -169,27 +218,27 @@ map_choice <- if(map_type == "Station"){
   }
 } else if(map_type == "Salinity"){
 
-  salinity_color <- c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F", "#0E5E8B",
-                      "#1A6989", "#267488", "#318088", "#3A8B88", "#439787", "#4BA385",
-                      "#56AF81", "#64BA7B", "#77C574", "#91CF6C", "#B0D66C", "#CCDE78",
-                      "#E6E58A", "#FEEEA0")
+# The limits for salinity were set based on values from historical fastcat
+# data. The low end is set at 26 psu and the high end 35. The mode for the
+# salinity data was 33.
+  salinity_color <- c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F",
+                      "#0E5E8B", "#1A6989", "#267488", "#318088", "#3A8B88",
+                      "#439787", "#4BA385", "#56AF81", "#64BA7B", "#77C574",
+                      "#91CF6C", "#B0D66C", "#CCDE78", "#E6E58A", "#FEEEA0")
 
-  gls_mod_sal <- spatial::surf.gls(np = 2, covmod = expcov,
-                                   x = map_data$LON, y = map_data$LAT,
-                                   z = map_data$SALINITY1, d = 1)
 
-  gls_pred_sal <- spatial::prmat(gls_mod_sal, yl = min(map_data$LAT,na.rm = TRUE),
-                                 yu = max(map_data$LAT, na.rm = TRUE),
-                                 xl = min(map_data$LON, na.rm = TRUE),
-                                 xu = max(map_data$LON, na.rm = TRUE),
-                                 n = 200)
 
 } else if(map_type == "Temperature"){
 
-  temperature_color <- c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87", "#524685",
-                         "#664D83", "#785383", "#8C5A82", "#A05F7F", "#B66478", "#CC686D",
-                         "#E0705D", "#EF7B4C", "#F78C41", "#FAA13D", "#F9B642", "#F5CD4D",
-                         "#EFE35B", "#E5FA6A")
+# The limits for temperature were set on the low end the temperature at which
+# seaeater freezes -2C and the high end of 18C which is 2 degrees higher than
+# the highest recored temperature from all fastcat data. This will give wiggle
+# room for higher temperatures in the future. The mode for temperature is 6C.
+#
+  temperature_color <- c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87",
+                         "#524685", "#664D83", "#785383", "#8C5A82", "#A05F7F",
+                         "#B66478", "#CC686D", "#E0705D", "#EF7B4C", "#F78C41",
+                         "#FAA13D", "#F9B642", "#F5CD4D", "#EFE35B", "#E5FA6A")
 } else{
   warning("No such map_type name, check spelling.")
 }
