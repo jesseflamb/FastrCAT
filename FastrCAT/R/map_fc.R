@@ -75,7 +75,7 @@ fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
 
 # Map title--------------------------------------------------------------------
 map_dir_name <- paste(current_path, paste(unique(fc_data$CRUISE),
-                                          "_" map_type,".png",sep = ""),
+                                          "_", map_type,".png",sep = ""),
                                     sep = "/")
 
 map_title <- paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
@@ -100,18 +100,18 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
         DEPTH <= max(depth_range, na.rm = TRUE)})%>%
     dplyr::group_by(LAT,LON)%>%
     dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
-    dplyr::select(LON, LAT, SALINITY)%>%
-    dplyr::mutate_all(na.omit(.))
+    dplyr::select(LON, LAT, SALINITY1)%>%
+    dplyr::mutate_all(na.omit)
 
 
-  WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
+  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
 
-  MAP_IDW_SPAT <- SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
+  MAP_IDW_SPAT <- sp::SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
                                          data = MAP_IDW,
                                          proj4string = WGS84)
 
-  x.range <- as.integer(c(min(MAP_IDW$LONG, na.rm = TRUE)-1,
-                          max(MAP_IDW$LONG, na.rm = TRUE)+1))
+  x.range <- as.integer(c(min(MAP_IDW$LON, na.rm = TRUE)-1,
+                          max(MAP_IDW$LON, na.rm = TRUE)+1))
 
   y.range <- as.integer(c(min(MAP_IDW$LAT, na.rm = TRUE)-1,
                           max(MAP_IDW$LAT, na.rm = TRUE)+1))
@@ -119,40 +119,40 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
   grd <- expand.grid(x = seq(from = x.range[1], to = x.range[2], by = 0.25),
                      y = seq(from = y.range[1], to = y.range[2], by = 0.25))
 
-  coordinates(grd) <- ~ x + y
+  sp::coordinates(grd) <- ~ x + y
 
   sp::gridded(grd) <- TRUE
 
-  proj4string(grd) <- WGS84
-
-  ## test it out - this is a good way of checking that your sample points are all well within your grid. If they are not, try some different values in you r x and y ranges:
+  sp::proj4string(grd) <- WGS84
 
 
-  idw <- idw(formula = MAP_IDW$VAR ~ 1, locations = MAP_IDW_SPAT,newdata = grd,
-             idp = 3)
+  idw <- gstat::idw(formula = MAP_IDW$SALINITY1 ~ 1, locations = MAP_IDW_SPAT,
+             newdata = grd, idp = 3)
 
   idw.output <- as.data.frame(idw)
-  names(idw.output)[1:3] <- c("LONG","LAT","VAR")
+  names(idw.output)[1:3] <- c("LON","LAT","SALINITY1")
 
   #Make the hull and the buffer
 
-  IDW_raster <- rasterFromXYZ(idw.output[,1:3],crs = WGS84)
-  IDW_hull <- gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- gBuffer(IDW_hull,width = .5)
-  IDW_buff_WGS84 <- spTransform(IDW_buff, WGS84)
+  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
+  IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
+  IDW_buff <- rgeos::gBuffer(IDW_hull,width = .5)
+  IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
 
-  IDW_raster_crop <- mask(IDW_raster, IDW_buff_WGS84)
+  IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
   #try this
-  Raster_crop_pt <- rasterToPoints(IDW_raster_crop, spatial = TRUE)
+  Raster_crop_pt <- raster::rasterToPoints(IDW_raster_crop, spatial = TRUE)
 
   Out_crop <- cbind(Raster_crop_pt@coords, Raster_crop_pt@data)
 
-  names(Out_crop) <- c("LONG","LAT","VAR")
+  names(Out_crop) <- c("LON","LAT","SALINITY1")
 
+  Out_crop
 
 } else if(map_type == "Temperature"){
 
-  fc_data%>%
+
+  MAP_IDW <- fc_data %>%
     dplyr::filter(if(is.na(depth_range[1])){
       DEPTH >= min(DEPTH, na.rm = TRUE) &
         DEPTH <= max(DEPTH, na.rm = TRUE)
@@ -160,7 +160,56 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
       DEPTH >= min(depth_range, na.rm = TRUE) &
         DEPTH <= max(depth_range, na.rm = TRUE)})%>%
     dplyr::group_by(LAT,LON)%>%
-    dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))
+    dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))%>%
+    dplyr::select(LON, LAT, TEMPERATURE1)%>%
+    dplyr::mutate_all(na.omit)
+
+
+  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
+
+  MAP_IDW_SPAT <- sp::SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
+                                             data = MAP_IDW,
+                                             proj4string = WGS84)
+
+  x.range <- as.integer(c(min(MAP_IDW$LON, na.rm = TRUE)-1,
+                          max(MAP_IDW$LON, na.rm = TRUE)+1))
+
+  y.range <- as.integer(c(min(MAP_IDW$LAT, na.rm = TRUE)-1,
+                          max(MAP_IDW$LAT, na.rm = TRUE)+1))
+
+  grd <- expand.grid(x = seq(from = x.range[1], to = x.range[2], by = 0.25),
+                     y = seq(from = y.range[1], to = y.range[2], by = 0.25))
+
+  sp::coordinates(grd) <- ~ x + y
+
+  sp::gridded(grd) <- TRUE
+
+  sp::proj4string(grd) <- WGS84
+
+
+  idw <- gstat::idw(formula = MAP_IDW$TEMPERATURE1 ~ 1, locations = MAP_IDW_SPAT,
+                    newdata = grd, idp = 3)
+
+  idw.output <- as.data.frame(idw)
+  names(idw.output)[1:3] <- c("LON","LAT","TEMPERATURE1")
+
+  #Make the hull and the buffer
+
+  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
+  IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
+  IDW_buff <- rgeos::gBuffer(IDW_hull,width = .5)
+  IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
+
+  IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
+  #try this
+  Raster_crop_pt <- raster::rasterToPoints(IDW_raster_crop, spatial = TRUE)
+
+  Out_crop <- cbind(Raster_crop_pt@coords, Raster_crop_pt@data)
+
+  names(Out_crop) <- c("LON","LAT","TEMPERATURE1")
+
+  Out_crop
+
 
 } else{
   warning("No such map_type name, check spelling.")
@@ -219,14 +268,27 @@ map_choice <- if(map_type == "Station"){
 } else if(map_type == "Salinity"){
 
 # The limits for salinity were set based on values from historical fastcat
-# data. The low end is set at 26 psu and the high end 35. The mode for the
-# salinity data was 33.
+# data. The low end is set at 27 psu and 1 + the high end 35. The mode for the
+# salinity data was 33. Contour for salinity is set to .5 PSU.
   salinity_color <- c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F",
                       "#0E5E8B", "#1A6989", "#267488", "#318088", "#3A8B88",
                       "#439787", "#4BA385", "#56AF81", "#64BA7B", "#77C574",
                       "#91CF6C", "#B0D66C", "#CCDE78", "#E6E58A", "#FEEEA0")
 
-
+  ggplot2::ggplot()+
+    ggplot2::geom_tile(aes(x = LON, y = LAT, fill = SALINITY1), size = 1,
+            data = map_data)+
+    ggplot2::geom_contour(aes(x = LON, y = LAT, z = SALINITY1),
+                          binwidth = 0.5,data = map_data,
+                 color = "#f0ead6", size = .5)+
+    ggplot2::scale_fill_gradientn(colors = salinity_color,
+                                  breaks = seq(27,35, by = 2),
+                                  labels = seq(27,35, by = 2),
+                                  limits = c(27,35))+
+    ggplot2::scale_color_gradientn(colors = salinity_color,
+                                   breaks = seq(27,35, by = 2),
+                                   labels = seq(27,35, by = 2),
+                                   limits = c(27,35))
 
 } else if(map_type == "Temperature"){
 
