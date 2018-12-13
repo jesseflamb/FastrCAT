@@ -10,6 +10,7 @@ Description: Complies data from .up files and converts them into a single datafr
     depth by temperature and salinity plots, maps of ...
 Depends: R (>= 3.5.1),
          sf(>= 0.6.3),
+         gstat(>= 1.1.6),
          ggspatial(>= 1.0.2),
          ggrepel(>= 0.8.0),
          dplyr (>= 0.7.6),
@@ -30,6 +31,7 @@ License: CC0
 Encoding: UTF-8
 LazyData: true
 Imports: sf(>= 0.6.3),
+         gstat(>= 1.1.6)
          ggspatial(>= 1.0.2),
          dplyr (>= 0.7.6),
          ggplot2 (>= 3.0.0),
