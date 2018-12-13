@@ -296,11 +296,27 @@ map_choice <- if(map_type == "Station"){
 # seaeater freezes -2C and the high end of 18C which is 2 degrees higher than
 # the highest recored temperature from all fastcat data. This will give wiggle
 # room for higher temperatures in the future. The mode for temperature is 6C.
-#
+# Binwidth for the temperature contour is 1 degree C.
+
   temperature_color <- c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87",
                          "#524685", "#664D83", "#785383", "#8C5A82", "#A05F7F",
                          "#B66478", "#CC686D", "#E0705D", "#EF7B4C", "#F78C41",
                          "#FAA13D", "#F9B642", "#F5CD4D", "#EFE35B", "#E5FA6A")
+
+  ggplot2::ggplot()+
+    ggplot2::geom_tile(aes(x = LON, y = LAT, fill = TEMPERATURE1), size = 1,
+                       data = map_data)+
+    ggplot2::geom_contour(aes(x = LON, y = LAT, z = TEMPERATURE1),
+                          binwidth = 1, data = map_data,
+                          color = "#f0ead6", size = .5)+
+    ggplot2::scale_fill_gradientn(colors = temperature_color,
+                                  breaks = seq(-2,18, by = 4),
+                                  labels = seq(-2,18, by = 4),
+                                  limits = c(-2,18))+
+    ggplot2::scale_color_gradientn(colors = temperature_color,
+                                   breaks = seq(-2,18, by = 4),
+                                   labels = seq(-2,18, by = 4),
+                                   limits = c(-2,18))
 } else{
   warning("No such map_type name, check spelling.")
 }
