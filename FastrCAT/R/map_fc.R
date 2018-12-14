@@ -21,7 +21,8 @@
 #' @param depth_range The desired depth range for either the "Salinity" or
 #' "Temperature". If the parameter is left as NA, then the entire water
 #' column will be averaged.Takes a two value vector, a minimum and maximum of
-#' desired depth range.
+#' desired depth range. For example a depth range of 5-10 meters would be
+#' entered as such c(5,10).
 #' @return A map of the desired type and depth range for a single cruise.
 
 
@@ -74,21 +75,46 @@ fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
              max(fc_data$LAT, na.rm = TRUE) + 2)
 
 # Map title--------------------------------------------------------------------
-map_dir_name <- paste(current_path, paste(unique(fc_data$CRUISE),
-                                          "_", map_type,".png",sep = ""),
-                                    sep = "/")
+
+map_dir_name <- if(map_type == "Station" | map_type == "Sample Intensity"){
+
+  paste(current_path, paste(unique(fc_data$CRUISE),
+                            "_", map_type,".png",sep = ""), sep = "/")
+
+} else if(map_type == "Salinity" | map_type == "Temperature"
+          & is.na(depth_range[1])){
+
+  paste(current_path, paste(unique(fc_data$CRUISE),
+                            "_", map_type,", total water column",
+                            ".png",sep = ""), sep = "/")
+
+} else if(map_type == "Salinity" | map_type == "Temperature"
+          & !is.na(depth_range[1])){
+
+  paste(current_path, paste(unique(fc_data$CRUISE),
+                            "_", map_type,
+                            min(depth_range, na.rm = TRUE), "_",
+                            max(depth_range, na.rm = TRUE),
+                            ".png",sep = ""), sep = "/")
+}
+
 
 map_title <- if(map_type == "Station" | map_type == "Sample Intensity"){
+
     paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
-  } else if(map_type == "Salinity" | map_type == "Temperature"
+
+    } else if(map_type == "Salinity" | map_type == "Temperature"
             & is.na(depth_range[1])){
+
     paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type,
          ", total water column",sep = "")
-  } else if(map_type == "Salinity" | map_type == "Temperature"
+
+    } else if(map_type == "Salinity" | map_type == "Temperature"
             & !is.na(depth_range[1])){
+
     paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type," ",
         min(depth_range, na.rm = TRUE), " to ",
-        max(depth_range, na.rm = TRUE), " m", sep = "")
+        max(depth_range, na.rm = TRUE), " m depth", sep = "")
   }
 
 # Dataframes and calculations for each map_type -------------------------------
@@ -147,7 +173,8 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
   IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
   IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- rgeos::gBuffer(IDW_hull,width = .5)
+  IDW_buff <- withCallingHandlers(suppressWarnings(
+    rgeos::gBuffer(IDW_hull,width = .5)))
   IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
 
   IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
@@ -234,7 +261,7 @@ map_choice <- if(map_type == "Station"){
   ggplot2::ggplot()+
     ggplot2::geom_point(aes(LON, LAT), size = 2, shape = 21,
                                       color = "black", fill = "#7394b5",
-                                      data = station_map)#+
+                                      data = map_data)#+
     #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
                              #size = 5, color = "black",
                              #data = station_map)
