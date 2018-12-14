@@ -235,8 +235,8 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
   IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
   IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- rgeos::withCallingHandlers(suppressWarnings(
-    gBuffer(IDW_hull,width = .5)))
+  IDW_buff <- withCallingHandlers(suppressWarnings(
+    rgeos::gBuffer(IDW_hull,width = .5)))
   IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
 
   IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
