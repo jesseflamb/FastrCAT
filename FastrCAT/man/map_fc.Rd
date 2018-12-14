@@ -25,11 +25,11 @@ should be quoted: "Station", "Sample Intensity", "Salinity", and
 
 \item{depth_range}{The desired depth range for either the "Salinity" or
 "Temperature". If the parameter is left as NA, then the entire water
-column will be averages.Takes a two value vector, a minimum and maximum of
+column will be averaged.Takes a two value vector, a minimum and maximum of
 desired depth range.}
 }
 \value{
-A station map
+A map of the desired type and depth range for a single cruise.
 }
 \description{
 Once make_dataframe_fc() has been run, then map_fc can be
