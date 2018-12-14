@@ -26,7 +26,8 @@ should be quoted: "Station", "Sample Intensity", "Salinity", and
 \item{depth_range}{The desired depth range for either the "Salinity" or
 "Temperature". If the parameter is left as NA, then the entire water
 column will be averaged.Takes a two value vector, a minimum and maximum of
-desired depth range.}
+desired depth range. For example a depth range of 5-10 meters would be
+entered as such c(5,10).}
 }
 \value{
 A map of the desired type and depth range for a single cruise.
