@@ -85,14 +85,14 @@ map_dir_name <- if(map_type == "Station" | map_type == "Sample Intensity"){
           & is.na(depth_range[1])){
 
   paste(current_path, paste(unique(fc_data$CRUISE),
-                            "_", map_type,", total water column",
+                            "_", map_type,",_total water column",
                             ".png",sep = ""), sep = "/")
 
 } else if(map_type == "Salinity" | map_type == "Temperature"
           & !is.na(depth_range[1])){
 
   paste(current_path, paste(unique(fc_data$CRUISE),
-                            "_", map_type,
+                            "_", map_type,"_",
                             min(depth_range, na.rm = TRUE), "_",
                             max(depth_range, na.rm = TRUE),
                             ".png",sep = ""), sep = "/")
@@ -173,7 +173,7 @@ map_data <- if(map_type == "Station" | map_type == "Sample Intensity"){
 
   IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
   IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- withCallingHandlers(suppressWarnings(
+  IDW_buff <- withCallingHandlers(suppressMessages(
     rgeos::gBuffer(IDW_hull,width = .5)))
   IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
 
