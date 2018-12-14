@@ -2,15 +2,15 @@
 % Please edit documentation in R/plot_time_series.R
 \name{plot_time_series}
 \alias{plot_time_series}
-\title{Time Series Plots}
+\title{GOA Time Series Plots}
 \usage{
 plot_time_series(hist_data, core_stations, plot_type,
-  fastcat_data = FALSE)
+  fastcat_data = FALSE, anomaly = FALSE)
 }
 \arguments{
 \item{hist_data}{Supply the path and .csv file name of the historical data
 in quotations. The historical data must be in the format created by
-the FastrCAT function make_dataframe_fc.}
+the FastrCAT::make_dataframe_fc.}
 
 \item{core_stations}{There are three core areas for the Gulf of Alaska which
 have been regularly sampled and are representative of the Gulf of Alaska.
@@ -30,6 +30,10 @@ sampled, with a bounding box of '55.1, -158.5, 55.9, -158.0'.}
 fastcat data. Supply the path and .csv file name to the current years
 fastcat data. This must be in the format created by the FastrCAT function
 make_dataframe_fc.}
+
+\item{anomaly}{An optional argument if you want the anomaly of the plot_type
+selected. This argument is set to FALSE, when set to TRUE then the anomaly
+will be plotted. The anomoly is calculated using the ...something equation.}
 }
 \value{
 A depth by year tile plot of temperature or salinity. The plot will
@@ -41,9 +45,11 @@ the 0 depth value. 0 depth can and has been problematic for fastcat data.
 Creates either temperature or salinity plots of core EcoFOCI
 stations in the Gulf of Alaska. Each plot displays the average temperature
 or salinity for each meter of depth of the core stations for each year for
-the months when peak sampling of these regions occured. Line 8 is most
-commonly sampled in May and June, Spring, whereas the Semidi region is
-sampled in
-Post 2010, these core stations were only sampled in odd numbered years. In
-the future more core areas will be added.
+the months when peak sampling of these regions occured. Line 8 and Semidi
+area are most commonly sampled in May and June, which is considered
+Spring. Summer sampling in the Gulf of Alaska has been less frequent and
+starts in the early 2000's. This summer sampling is in the Semidi core
+area, summer is considered August and September.Post 2010, these core
+stations were only sampled in odd numbered years. In the future more core
+areas will be added.
 }
