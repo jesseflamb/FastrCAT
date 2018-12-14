@@ -583,7 +583,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE){
 # Station map for Cruise summary-----------------------------------------------
 # bring in the shape files to make the basemap --------------------------------
 
-  MAP <- sf::st_read(dsn = system.file("extdata", package = "FastCAT")
+  MAP <- sf::st_read(dsn = system.file("extdata", package = "FastrCAT")
                      ,layer = "Alaska_dcw_polygon_Project", quiet = TRUE)
 
 # tranform into WGS84 coordinate system----------------------------------------
@@ -592,7 +592,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE){
 
 # bring in 200m bathymetry contour --------------------------------------------
 
-  BATH_200 <- sf::st_read(dsn = system.file("extdata", package = "FastCAT"),
+  BATH_200 <- sf::st_read(dsn = system.file("extdata", package = "FastrCAT"),
                           layer = "ne_10m_bathymetry_K_200", quiet = TRUE)
 # transform into WGS84 coordinate system---------------------------------------
 
