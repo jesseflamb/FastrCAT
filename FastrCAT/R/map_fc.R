@@ -78,7 +78,18 @@ map_dir_name <- paste(current_path, paste(unique(fc_data$CRUISE),
                                           "_", map_type,".png",sep = ""),
                                     sep = "/")
 
-map_title <- paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
+map_title <- if(map_type == "Station" | map_type == "Sample Intensity"){
+    paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type, sep = "")
+  } else if(map_type == "Salinity" | map_type == "Temperature"
+            & is.na(depth_range[1])){
+    paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type,
+         ", total water column",sep = "")
+  } else if(map_type == "Salinity" | map_type == "Temperature"
+            & !is.na(depth_range[1])){
+    paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type," ",
+        min(depth_range, na.rm = TRUE), " to ",
+        max(depth_range, na.rm = TRUE), " m", sep = "")
+  }
 
 # Dataframes and calculations for each map_type -------------------------------
 
@@ -244,7 +255,8 @@ map_choice <- if(map_type == "Station"){
     ggplot2::scale_fill_gradientn(colors = intensity_color,
                                   breaks = seq(1,10, by = 2),
                                   labels = seq(1,10, by = 2),
-                                  limits = c(1,10))+
+                                  limits = c(1,10),
+                                  name = "Casts(n)")+
     ggplot2::scale_color_gradientn(colors = intensity_color,
                                    breaks = seq(1,10, by = 2),
                                    labels = seq(1,10, by = 2),
@@ -257,7 +269,8 @@ map_choice <- if(map_type == "Station"){
       ggplot2::scale_fill_gradientn(colors = intensity_color,
                                     breaks = seq(1,40, by = 5),
                                     labels = seq(1,40, by = 5),
-                                    limits = c(1,40))+
+                                    limits = c(1,40),
+                                    name = "Casts(n)")+
       ggplot2::scale_color_gradientn(colors = intensity_color,
                                      breaks = seq(1,40, by = 5),
                                      labels = seq(1,40, by = 5),
@@ -284,7 +297,8 @@ map_choice <- if(map_type == "Station"){
     ggplot2::scale_fill_gradientn(colors = salinity_color,
                                   breaks = seq(27,35, by = 2),
                                   labels = seq(27,35, by = 2),
-                                  limits = c(27,35))+
+                                  limits = c(27,35),
+                                  name = expression(bold("PSU")))+
     ggplot2::scale_color_gradientn(colors = salinity_color,
                                    breaks = seq(27,35, by = 2),
                                    labels = seq(27,35, by = 2),
@@ -298,21 +312,23 @@ map_choice <- if(map_type == "Station"){
 # room for higher temperatures in the future. The mode for temperature is 6C.
 # Binwidth for the temperature contour is 1 degree C.
 
-  temperature_color <- c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87",
-                         "#524685", "#664D83", "#785383", "#8C5A82", "#A05F7F",
-                         "#B66478", "#CC686D", "#E0705D", "#EF7B4C", "#F78C41",
-                         "#FAA13D", "#F9B642", "#F5CD4D", "#EFE35B", "#E5FA6A")
+  temperature_color <- c("#0E0C71", "#1D159E", "#1D26C9", "#174CBB", "#2F63B3",
+                         "#4977B2", "#658AB4", "#7F9DB9", "#9AAFC1", "#B6C3CD",
+                         #"#D2D7DB" "#EEEDED" "#E0D2CF"
+                         "#D6B8B1", "#CB9F93", "#C28676", "#B86E5A", "#AD543E",
+                         "#A23925", "#931A11", "#7B0413", "#5D0311", "#41000B")
 
   ggplot2::ggplot()+
     ggplot2::geom_tile(aes(x = LON, y = LAT, fill = TEMPERATURE1), size = 1,
                        data = map_data)+
     ggplot2::geom_contour(aes(x = LON, y = LAT, z = TEMPERATURE1),
                           binwidth = 1, data = map_data,
-                          color = "#f0ead6", size = .5)+
+                          color = "#4c7f7f", size = .25)+
     ggplot2::scale_fill_gradientn(colors = temperature_color,
                                   breaks = seq(-2,18, by = 4),
                                   labels = seq(-2,18, by = 4),
-                                  limits = c(-2,18))+
+                                  limits = c(-2,18),
+                                  name = expression(bold( ~degree~C )))+
     ggplot2::scale_color_gradientn(colors = temperature_color,
                                    breaks = seq(-2,18, by = 4),
                                    labels = seq(-2,18, by = 4),
