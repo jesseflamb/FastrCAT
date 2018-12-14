@@ -21,7 +21,7 @@ plot_ts_fc <- function(current_path){
 
 # Find file -------------------------------------------------------------------
 
-  to_datadframe <- list.files(path = current_path, pattern = "\\EcoDATT.csv$",
+  to_datadframe <- list.files(path = current_path, pattern = "\\EcoDAAT.csv$",
                               ignore.case = TRUE,
                               include.dirs = TRUE, full.names = TRUE)
 
