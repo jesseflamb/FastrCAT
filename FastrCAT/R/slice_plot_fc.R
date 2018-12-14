@@ -95,10 +95,11 @@ idw_grd <- idw_grd %>% bind_cols(idw_mod)
 # package. These colors are standardized for oceanographic plots.--------------
 plot_color <- if(plot_type == "temperature"){
 
-  c("#0B222E", "#062C46", "#013565", "#1C3983", "#3C3E87", "#524685",
-    "#664D83", "#785383", "#8C5A82", "#A05F7F", "#B66478", "#CC686D",
-    "#E0705D", "#EF7B4C", "#F78C41", "#FAA13D", "#F9B642", "#F5CD4D",
-    "#EFE35B", "#E5FA6A")
+  c("#0E0C71", "#1D159E", "#1D26C9", "#174CBB", "#2F63B3",
+    "#4977B2", "#658AB4", "#7F9DB9", "#9AAFC1", "#B6C3CD",
+    #"#D2D7DB" "#EEEDED" "#E0D2CF"
+    "#D6B8B1", "#CB9F93", "#C28676", "#B86E5A", "#AD543E",
+    "#A23925", "#931A11", "#7B0413", "#5D0311", "#41000B")
 
 }else if(plot_type == "salinity"){
 

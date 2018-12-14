@@ -121,11 +121,11 @@ plot_data <- if(plot_type == "temperature"){
 # is the salinity oce color ramp. ---------------------------------------------
 plot_color <- if(plot_type == "temperature"){
 
-  c( "#22325E","#214985", "#136495", "#107EA0", #BLUE "#132037",
-    "#2E97A8","#65ACAE","#95BEBC", "#C0D4CF",
-    "#E8EDE3", # Eggshell
-    "#f5af19","#f5af19","#f12711","#ff2525", "#f10000",
-    "#bd0000", "#a30000" ,"#560000") # RED ,"#230000"
+  c("#0E0C71", "#1D159E", "#1D26C9", "#174CBB", "#2F63B3",
+    "#4977B2", "#658AB4", "#7F9DB9", "#9AAFC1", "#B6C3CD",
+    #"#D2D7DB" "#EEEDED" "#E0D2CF"
+    "#D6B8B1", "#CB9F93", "#C28676", "#B86E5A", "#AD543E",
+    "#A23925", "#931A11", "#7B0413", "#5D0311", "#41000B")
 
    }else if(plot_type == "salinity"){
 
