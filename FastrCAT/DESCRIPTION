@@ -5,7 +5,7 @@ Version: 0.0.0.9000
 Author: person(given = "Nissa", family = "Ferm", email = "nissa.ferm@noaa.gov",role = c("aut","cre"))
 Maintainer: Nissa Ferm <nissa.ferm@noaa.gov>
 Description: Complies data from .up files and converts them into a single dataframe.Provides feedback to trouble shoot data quality issues from FastCat generated data. Produces depth by temperature and salinity plots, maps of ...
-Depends: R (>= 3.5.1),
+Depends: R (>= 3.5.0),
          sf(>= 0.6.3),
          ggspatial(>= 1.0.2),
          ggrepel(>= 0.8.0),
