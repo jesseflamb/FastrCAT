@@ -50,8 +50,8 @@ fc_data <- readr::read_csv(list.files(path = current_path,
 
 # bring in the shape files to make the basemap --------------------------------
 
-MAP <- sf::st_read(dsn = "inst/extdata",layer = "Alaska_dcw_polygon_Project",
-                   quiet = TRUE)
+MAP <- sf::st_read(dsn = system.file("extdata", package = "FastCAT"),
+                   layer = "Alaska_dcw_polygon_Project", quiet = TRUE)
 
 # tranform into WGS84 coordinate system----------------------------------------
 
@@ -59,8 +59,8 @@ MAP <- sf::st_transform(MAP, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
 # bring in 200m bathymetry contour --------------------------------------------
 
-BATH_200 <- sf::st_read(dsn = "inst/extdata", layer = "ne_10m_bathymetry_K_200",
-                        quiet = TRUE)
+BATH_200 <- sf::st_read(dsn = system.file("extdata", package = "FastCAT"),
+                        layer = "ne_10m_bathymetry_K_200", quiet = TRUE)
 
 # transform into WGS84 coordinate system---------------------------------------
 
