@@ -218,12 +218,18 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 
 
 
-  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
+  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +units=km")
 
   MAP_IDW_SPAT <- sp::SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
                                              data = MAP_IDW,
                                              proj4string = WGS84)
+#test_____________________________
+  stations <- sp::spTransform(x = MAP_IDW_SPAT, CRSobj = WGS84)
 
+  distance <- raster::distanceFromPoints(object = MAP_IDW_SPAT, xy = stations)
+
+  distance_raster <- raster::mask(x = IDW_raster, mask = MAP_IDW_SPAT)
+#Test______________________________
   x.range <- as.integer(c(min(MAP_IDW$LON, na.rm = TRUE)-1,
                           max(MAP_IDW$LON, na.rm = TRUE)+1))
 
@@ -251,7 +257,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
   IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
   IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
   IDW_buff <- withCallingHandlers(suppressWarnings(
-    rgeos::gBuffer(IDW_hull,width = .5)))
+    rgeos::gBuffer(IDW_hull,width = 0.5)))
+
   IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
 
   IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
