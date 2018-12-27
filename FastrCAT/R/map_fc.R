@@ -10,11 +10,9 @@
 #' default map is a station map. Map types are Stations: returns map of
 #' station locations, Sample intensity: returns a map of sampling intesity
 #' for each 0.3 decimal degrees which is around 30km for the regions that are
-#' sampled hexagon, Salinity: returns an
-#' map using a least-squares gridding method for the average of the depth_range
-#' specified. If depth_range remains as NA, then the entire water column will
-#' be averaged.Temperature: returns a map using a least-squares gridding method
-#' for the average of the depth_range specified. If depth_range remains as NA,
+#' sampled hexagon, Salinity and Temperature: return an interpolated map using
+#' inverse distance weighting method, set on a 0.25 decimal degree grid for
+#' the average of the depth_range specified. If depth_range remains as NA,
 #' then the entire water column will be averaged. Map types are as follows and
 #' should be quoted: "Stations", "Sample Intensity", "Salinity", and
 #' "Temperature".
@@ -147,13 +145,13 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
   }
 
 
-
   WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
 
   MAP_IDW_SPAT <- sp::SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
-                                         data = MAP_IDW,
-                                         proj4string = WGS84)
+                                             data = MAP_IDW,
+                                             proj4string = WGS84)
 
+  # Make grid for idw by 0.25 degrees and convert to spatial object------------
   x.range <- as.integer(c(min(MAP_IDW$LON, na.rm = TRUE)-1,
                           max(MAP_IDW$LON, na.rm = TRUE)+1))
 
@@ -169,26 +167,25 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 
   sp::proj4string(grd) <- WGS84
 
-
-  idw <- gstat::idw(formula = MAP_IDW$SALINITY1 ~ 1, locations = MAP_IDW_SPAT,
-             newdata = grd, idp = 3)
+  # inverse distance weighting for variable------------------------------------
+  idw <- gstat::idw(formula = MAP_IDW$SALINITY1 ~ 1,
+                    locations = MAP_IDW_SPAT,
+                    newdata = grd, idp = 3)
 
   idw.output <- as.data.frame(idw)
   names(idw.output)[1:3] <- c("LON","LAT","SALINITY1")
 
-  #Make the hull and the buffer
+  # Makes a .35 degree buffer around each station------------------------------
+  IDW_buff_WGS84 <- sf::st_as_sf(MAP_IDW, coords = c("LON","LAT"))%>%
+    sf::st_buffer(., .35)%>%
+    sf::st_as_sf(.)
 
-  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
-  IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- withCallingHandlers(suppressWarnings(
-    rgeos::gBuffer(IDW_hull,width = .5)))
-  IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
+  # Converts the idw dataframe to a raster and masks non-buffer area-----------
+  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)%>%
+    raster::mask(., IDW_buff_WGS84)%>%
+    raster::rasterToPoints(., spatial = TRUE)
 
-  IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
-  #try this
-  Raster_crop_pt <- raster::rasterToPoints(IDW_raster_crop, spatial = TRUE)
-
-  Out_crop <- cbind(Raster_crop_pt@coords, Raster_crop_pt@data)
+  Out_crop <- cbind(IDW_raster@coords, IDW_raster@data)
 
   names(Out_crop) <- c("LON","LAT","SALINITY1")
 
@@ -216,20 +213,13 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
   }
 
 
-
-
-  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +units=km")
+  WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
 
   MAP_IDW_SPAT <- sp::SpatialPointsDataFrame(coords = MAP_IDW[,c("LON","LAT")],
                                              data = MAP_IDW,
                                              proj4string = WGS84)
-#test_____________________________
-  stations <- sp::spTransform(x = MAP_IDW_SPAT, CRSobj = WGS84)
 
-  distance <- raster::distanceFromPoints(object = MAP_IDW_SPAT, xy = stations)
-
-  distance_raster <- raster::mask(x = IDW_raster, mask = MAP_IDW_SPAT)
-#Test______________________________
+  # Make grid for idw by 0.25 degrees and convert to spatial object------------
   x.range <- as.integer(c(min(MAP_IDW$LON, na.rm = TRUE)-1,
                           max(MAP_IDW$LON, na.rm = TRUE)+1))
 
@@ -245,27 +235,25 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 
   sp::proj4string(grd) <- WGS84
 
-
-  idw <- gstat::idw(formula = MAP_IDW$TEMPERATURE1 ~ 1, locations = MAP_IDW_SPAT,
+  # inverse distance weighting for variable------------------------------------
+  idw <- gstat::idw(formula = MAP_IDW$TEMPERATURE1 ~ 1,
+                    locations = MAP_IDW_SPAT,
                     newdata = grd, idp = 3)
 
   idw.output <- as.data.frame(idw)
   names(idw.output)[1:3] <- c("LON","LAT","TEMPERATURE1")
 
-  #Make the hull and the buffer
+  # Makes a .35 degree buffer around each station------------------------------
+  IDW_buff_WGS84 <- sf::st_as_sf(MAP_IDW, coords = c("LON","LAT"))%>%
+    sf::st_buffer(., .35)%>%
+    sf::st_as_sf(.)
 
-  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)
-  IDW_hull <- rgeos::gConvexHull(MAP_IDW_SPAT)
-  IDW_buff <- withCallingHandlers(suppressWarnings(
-    rgeos::gBuffer(IDW_hull,width = 0.5)))
+  # Converts the idw dataframe to a raster and masks non-buffer area-----------
+  IDW_raster <- raster::rasterFromXYZ(idw.output[,1:3],crs = WGS84)%>%
+    raster::mask(., IDW_buff_WGS84)%>%
+    raster::rasterToPoints(., spatial = TRUE)
 
-  IDW_buff_WGS84 <- sp::spTransform(IDW_buff, WGS84)
-
-  IDW_raster_crop <- raster::mask(IDW_raster, IDW_buff_WGS84)
-  #try this
-  Raster_crop_pt <- raster::rasterToPoints(IDW_raster_crop, spatial = TRUE)
-
-  Out_crop <- cbind(Raster_crop_pt@coords, Raster_crop_pt@data)
+  Out_crop <- cbind(IDW_raster@coords, IDW_raster@data)
 
   names(Out_crop) <- c("LON","LAT","TEMPERATURE1")
 
