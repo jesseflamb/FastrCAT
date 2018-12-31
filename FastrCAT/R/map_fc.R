@@ -46,6 +46,14 @@ fc_data <- readr::read_csv(list.files(path = current_path,
                                      TEMPERATURE1 = col_double(),
                                      SALINITY1 = col_double()))
 
+# Check for plot folder--------------------------------------------------------
+
+if(dir.exists(paste(current_path,"/plots",sep = "")) == FALSE){
+
+  dir.create(paste(current_path,"/plots",sep = ""))
+}
+
+
 # bring in the shape files to make the basemap --------------------------------
 
 MAP <- sf::st_read(dsn = system.file("extdata", package = "FastrCAT"),
@@ -72,24 +80,24 @@ fc_xlim <- c(min(fc_data$LON, na.rm = TRUE) - 2,
 fc_ylim <- c(min(fc_data$LAT, na.rm = TRUE) - 2,
              max(fc_data$LAT, na.rm = TRUE) + 2)
 
-# Map title--------------------------------------------------------------------
+# Map directory----------------------------------------------------------------
 
 map_dir_name <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 
-  paste(current_path, paste(unique(fc_data$CRUISE),
+  paste(current_path, "plots",paste(unique(fc_data$CRUISE),
                             "_", map_type,".png",sep = ""), sep = "/")
 
 } else if(map_type == "Salinity" & is.na(depth_range[1]) |
           map_type == "Temperature" & is.na(depth_range[1])){
 
-  paste(current_path, paste(unique(fc_data$CRUISE),
+  paste(current_path, "plots", paste(unique(fc_data$CRUISE),
                             "_", map_type,"_total water column",
                             ".png",sep = ""), sep = "/")
 
 } else if(map_type == "Salinity" & !is.na(depth_range[1]) |
           map_type == "Temperature" & !is.na(depth_range[1])){
 
-  paste(current_path, paste(unique(fc_data$CRUISE),
+  paste(current_path, "plots", paste(unique(fc_data$CRUISE),
                             "_", map_type,"_",
                             min(depth_range, na.rm = TRUE), "_",
                             max(depth_range, na.rm = TRUE),
