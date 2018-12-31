@@ -152,8 +152,15 @@ time_range <- paste(min(plot_data$`year(DATE)`), "_",
 current_path <- unlist(stringr::str_split(hist_data, "/"))
 current_path <- paste(current_path[ 1:length(current_path)-1], collapse = "/" )
 
+# Check for plot folder--------------------------------------------------------
+
+if(dir.exists(paste(current_path,"/plots",sep = "")) == FALSE){
+
+  dir.create(paste(current_path,"/plots",sep = ""))
+}
+
 # name time series plot to write to file --------------------------------------
-name_time_series_plot <- paste(current_path, "/", core_stations, "_", plot_type,
+name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_", plot_type,
                                "_", time_range, ".png",sep = "")
 
 # Time series plot ------------------------------------------------------------
