@@ -1,8 +1,10 @@
-#' @title Fill in missing station, foci grid, and haul names
+#' @title Fill in missing station, foci grid, and haul names.
 #'
 #' @description Takes the .csv file created with make_dataframe_fc() and
 #' haul records queried from EcoDAAT and finds and replaces missing
-#' station names, foci grid names, and haul numbers in the dataframe.
+#' station names, foci grid names, and haul numbers in the dataframe. Make
+#' sure that haul records are available for cruise. This is part of the
+#' quality/control process prior to the data being ready for EcoDAAT.
 #' @param path_fc The path to the directory where the .csv file
 #' generated from make_dataframe_fc() is located.
 #' @param path_haul_records The path to the directory where the .csv file
@@ -102,7 +104,7 @@ for(n in 1:nrow(ALL_BON)){
 }
 
 
-file_name <- paste(unique(ALL_BON$CRUISE),"_add_haul_rcds" , ".csv", sep = "")
+file_name <- paste(unique(ALL_BON$CRUISE),"_corrected_haul_rcds" , ".csv", sep = "")
 
 write_csv(ALL_BON, file_name)
 
