@@ -3,7 +3,8 @@
 #' @description Once make_dataframe_fc has been run, then plot_ts_fc
 #' can be used. This function creates a depth by salinity and temperature
 #' plot for each station. These are all .png files which will be located
-#' in the plot folder within the current folder. It only needs to be run
+#' in the plot folder within the current folder. If a plot folder hasn't been
+#' created, it will create on. It only needs to be run
 #' once to generate a plot for each station. Each dot is a data point.
 #' Check the profile for each station/haul.
 #' @param current_path The path to directory where dataframe created from
@@ -14,8 +15,6 @@
 #' are in the .png format.
 
 
-
-
 plot_ts_fc <- function(current_path){
 
 
@@ -24,6 +23,13 @@ plot_ts_fc <- function(current_path){
   to_datadframe <- list.files(path = current_path, pattern = "\\EcoDAAT.csv$",
                               ignore.case = TRUE,
                               include.dirs = TRUE, full.names = TRUE)
+
+# Check for plot folder--------------------------------------------------------
+
+  if(dir.exists(paste(current_path,"/plots",sep = "")) == FALSE){
+
+    dir.create(paste(current_path,"/plots",sep = ""))
+  }
 
 
 # Load data -------------------------------------------------------------------
