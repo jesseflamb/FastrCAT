@@ -27,7 +27,7 @@ Full documentation of the process is available in vignettes
 install.packages(remotes)
 
 remotes::install_github("Copepoda/FastrCAT/FastrCAT", build = TRUE, 
-                        build_opts = c("--no-resave-data", "--no-manual")
+                        build_opts = c("--no-resave-data", "--no-manual"))
 
 ````
 
