@@ -24,9 +24,10 @@ Full documentation of the process is available in vignettes
 ## How to install the package from GitHub
 
 ```{r eval=FALSE}
-install.packages(devtools)
+install.packages(remotes)
 
-devtools::install_github("Copepoda/FastrCAT/FastrCAT", build_vignettes = TRUE)
+remotes::install_github("Copepoda/FastrCAT/FastrCAT", build = TRUE, 
+                        build_opts = c("--no-resave-data", "--no-manual")
 
 ````
 
