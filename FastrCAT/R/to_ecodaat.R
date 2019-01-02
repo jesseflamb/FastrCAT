@@ -8,7 +8,8 @@
 #' one .csv file for import into EcoDAAT.
 #' @param fc_data_path Path to the folder where all FastrCAT data files are
 #' located.
-#' @return a single .csv files
+#' @return a single .csv files and a ReadMe file of information about the
+#' .csv file.
 
 
 to_ecodaat <- function(fc_data_path){
@@ -44,10 +45,13 @@ to_ecodaat <- function(fc_data_path){
 
   }
 
+# Row bind files together and rename header info for EcoDAAT input-------------
 fc_data_all <- do.call("rbind", fc_data)%>%
+  dplyr::mutate(Flag = NA)%>%
   dplyr::select(LAT, LON, DATE, TIME, PRESSURE, DEPTH, TEMPERATURE1,
-                CONDUCTIVITY1, SALINITY1, SIGMA_T, CRUISE, STATION_NAME,
+                CONDUCTIVITY1, SALINITY1, SIGMA_T, Flag, CRUISE, STATION_NAME,
                 HAUL_NAME, FOCI_GRID) %>%
+
   #If header names change in the future, edit here: New name = Old name--------
   dplyr::rename(Latitude = LAT,
                 Longitude = LON,
@@ -64,22 +68,43 @@ fc_data_all <- do.call("rbind", fc_data)%>%
                 Haul = HAUL_NAME,
                 Grid = FOCI_GRID)
 
+#Make random number for file for unique ID-------------------------------------
+unique_id <- sample(1000:9999, 1, replace = FALSE)
+
 #Make read me for file, summary------------------------------------------------
 
 read_me <- c(
   '---',
-  'title: "Summary for `r Sys.Date()` fastcat_data_EcoDAAT_ready" ',
-  'output: htm_document',
+  'title: "Readme" ',
+  'output: html_document',
   '---',
   '',
-  '## Cruise Report for `r cruise_name_check[1]`',
-  '',
-  '### Quick Cruise FastCAT Summary'
+  '## Quick FastCAT data Summary',
+  'This is the ReadMe file for the fastcat data summary for',
+  '*fastcat_data_EcoDAAT_ready* .csv file number `r unique_id` created on',
+  '`r Sys.Date()`.',
+  '### Cruises included in file:',
+  '```{r, echo = FALSE}',
+  'print(unique(fc_data_all$Cruise))',
+  '```',
+  '### Dimensions of file:',
+  '```{r, echo = FALSE}',
+  'print(dim(fc_data_all))',
+  '````',
+  '### Header Names of file:',
+  '```{r, echo = FALSE}',
+  'print(colnames(fc_data_all))',
+  '````',
+  "### Summary of data, check for NA's",
+  '```{r, echo = FALSE}',
+  'print(summary(fc_data_all))',
+  '````'
 )
 
 # write to file----------------------------------------------------------------
 
-new_fc_data_path <- paste(fc_data_path, "/", "fastcat_data_EcoDAAT_ready_",
+new_fc_data_path <- paste(fc_data_path, "/", unique_id,
+                          "_fastcat_data_EcoDAAT_ready_",
                           Sys.Date(), ".csv", sep = "")
 
 readr::write_csv(fc_data_all, new_fc_data_path)
@@ -87,7 +112,7 @@ readr::write_csv(fc_data_all, new_fc_data_path)
 # Render Read me --------------------------------------------------------------
 markdown::markdownToHTML(text = knitr::knit(text = read_me),
                          output = paste(fc_data_path,
-                                        paste("ReadMe", Sys.Date(),
+                                        paste(unique_id, "_ReadMe", Sys.Date(),
                                         ".html", sep = "_"),
                                         sep = "/"))
 
