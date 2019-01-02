@@ -64,10 +64,31 @@ fc_data_all <- do.call("rbind", fc_data)%>%
                 Haul = HAUL_NAME,
                 Grid = FOCI_GRID)
 
+#Make read me for file, summary------------------------------------------------
+
+read_me <- c(
+  '---',
+  'title: "Summary for `r Sys.Date()` fastcat_data_EcoDAAT_ready" ',
+  'output: htm_document',
+  '---',
+  '',
+  '## Cruise Report for `r cruise_name_check[1]`',
+  '',
+  '### Quick Cruise FastCAT Summary'
+)
+
 # write to file----------------------------------------------------------------
 
+new_fc_data_path <- paste(fc_data_path, "/", "fastcat_data_EcoDAAT_ready_",
+                          Sys.Date(), ".csv", sep = "")
 
+readr::write_csv(fc_data_all, new_fc_data_path)
 
-write_csv()
+# Render Read me --------------------------------------------------------------
+markdown::markdownToHTML(text = knitr::knit(text = read_me),
+                         output = paste(fc_data_path,
+                                        paste("ReadMe", Sys.Date(),
+                                        ".html", sep = "_"),
+                                        sep = "/"))
 
 }
