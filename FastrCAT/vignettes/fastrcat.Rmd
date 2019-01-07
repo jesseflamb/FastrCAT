@@ -52,7 +52,7 @@ Functions in FastrCAT
 
 make_dataframe_fc()
 ---	
-This function writes a single data frame in .csv format to file containing oceanographic data collected by the FastCat during a cruise.  The format and column naming conventions are specific to the needs of EcoDAAT. This is the primary function of the FastrCAT package and must be run prior to all other functions. All other functions depend on the data frame generated. Other outputs of the function are two text files. This first is a cruise summary. The summary contains basic information about the data and some summary statistics. The second is a warnings file, which tells users if data or information is missing incase reprocessing is necessary. 
+This function writes a single data frame in .csv format to file containing oceanographic data collected by the FastCat during a cruise.  The format and column naming conventions are specific to the needs of EcoDAAT. This is the primary function of the FastrCAT package and must be run prior to all other functions. All other functions depend on the data frame generated. A cruise summary report is generated and written to file. The cruise summary is in .html format. The summary contains basic information about the data and some summary statistics. Plots of the average temperature and salinity profiles and a station map. It also provides feedback on which .up files might be problematic due to header information or anomolous temperature and salinity readings. 
 
 **Usage**
 
@@ -62,7 +62,7 @@ This function writes a single data frame in .csv format to file containing ocean
 
 Shows the first four rows and the first seven columns of an example dataframe. 
 ```{r, echo = FALSE}
-example_file <- read.csv("DY14-08_forEcoDAAT.csv")
+example_file <- read.csv("DY15-05_forEcoDAAT.csv")
 head(example_file[,c(1:7)],4)
 ```
 
@@ -77,7 +77,7 @@ colnames(example_file)
 All header information is hand entered into MasterCOD from a COD form for each consecutive FastCAT deployment. Header information acquired by the PERL script has not been consistent across all years. Since 1997 theses have been the various headers acquired from MasterCOD: latitude, longitude, date, time, cruise name, station name, haul name, Foci grid name, bottom depth, and instrument type. The function as built handles all types of header information listed above. Latitude and longitude are converted from degrees minutes seconds to decimal degrees. Date and time are converted into a date-time format set with a UTC time zone. One common error is that no header information is found. This error is most commonly due to the FastCat data being processed prior to station information being entered into MasterCOD. The function FastCat_compile.R within the package FastrCAT will generate a warning which is in the Cruise Report. 
 	
 
-**Example Header Warning**
+**Example Header Warning in Cruise Report**
 
 >"1" "This file G:/SeaCatData/Processed/1DY10/CAL001.up has no header info needs to be reprocessed."
 
@@ -102,7 +102,7 @@ Issues that can’t be resolved by the make_dataframe_fc() are when Cruise names
 In each .up file the numerical data is found in tab delineated columnar format after \*END*. Each row in the .up file represents a single integer of pressure. The SeaBird FastCAT takes readings 16 times a second. For all values within an integer of pressure, one can select an average or an interpolated average. Over the years there have been as few as four columns of data up to nine. First the function looks to see if there is any data. If there is no data then a warning will be in the Cruise Report. 
 
 
-**No data warning example:**
+**No data warning example from Cruise Report:**
 	
 >1" "This file G:/SeaCatData/Processed/DY17-05/BON055.up has no data associated with it."
 
@@ -116,12 +116,8 @@ Provides a short paragraph of number of tows, salinity, temperature, and locatio
 **Example of Cruise Summary**
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::asis_output(htmltools::includeHTML("DY16-06_Cruise_Report.html"))
+knitr::asis_output(htmltools::includeHTML("DY15-05_Cruise_Report.html"))
 ```
-
-
-Notice that this cruise has multiple cruise names, these would need to be corrected in MasterCOD. Instead of Station and haul names there are only FOCI grid names. Make sure that this is what is wanted for the cruise and correct in MasterCOD. In this case the cruise station haul info was in the .up file name, this is an artifact of older cruises. Bottom depth also had a lot of NA’s. This cruise had several tows in very deep water, this mean there were a couple of tows where bottom depth was not recorded in MasterCOD. You can discover which files didn’t have bottom depth recorded by filtering for NA’s in the BOTTOM_DEPTHS column in the .csv file and looking at the DIRECTORY column for the cast number. From this we discover that it was two casts, ST14H1.up and ST15.H1.up or FOCI grids BP07 and BS04. Then go back and correct in MasterCOD if necessary. 
-
 
 
 plot_ts_fc()
@@ -153,19 +149,35 @@ knitr::include_graphics("AE10-01_Station_41_2.png")
 map_fc()
 ---
 
-Once the make_dataframe_fc() has been run and the .csv file of the temperature, salinity, and conductivity is available you can use map_fc(). This function makes a station map. The rendered map will be written to the plot folder. It takes one argument, the path to the .csv file. 
+Once the make_dataframe_fc() has been run and the .csv file of the temperature, salinity, and conductivity is available you can use map_fc(). This function makes a station map by default. Other choices are sampling intensity, Salinity, and Temperature. The Salinity and Temperature maps are interpolated using inverse distance weighting and depth ranges can be selected as well. 
 
 ```{r,eval=FALSE}
- map_fc("path/ to directory/ of fastrcat dataframe")
+ map_fc("path/ to directory/ of fastrcat dataframe", map_type = "Sample Intensity")
 ```	
 
-Here is an example of a station map. 
+Here is an example of a sampling intensity map. Scales for legend will always be the same, for easy comparison among years. 
 
-```{r echo=FALSE, fig.cap= "Incorrect Output", fig.show='hold'}
+```{r echo=FALSE, fig.cap= "Sample Intensity Map", fig.show='hold'}
 
-knitr::include_graphics("DY1504_Station_map.png")
+knitr::include_graphics("DY15-05_Sample Intensity.png")
 
 ```
+
+Here is an example of a temperature map. This map shows the average temperature from 5 to 10 meters across the sampling grid. 
+
+```{r, eval = FALSE}
+map_fc("path/ to directory/ of fastrcat dataframe", map_type = "Temperature", depth_range = c(5,10))
+
+```
+
+```{r echo=FALSE, fig.cap= "Temperature Map", fig.show='hold'}
+
+knitr::include_graphics("DY15-05_Temperature_5_10.png")
+
+```
+
+The following functions should be done once you have access to EcoDAAT with the corrected haul data and to past years data.
+
 
 fill_missing_stations()
 ---
@@ -178,6 +190,30 @@ fill_missing_stations("path/ to directory/ of fastrcat dataframe",
                       "path/ to directory/ of haul records dataframe")
 
 ```
+
+to_ecodaat()
+---
+This function preps data for easy loading into EcoDAAT. You provide it with a path to the folder with all the cruise seasons files prepared using the make_dataframe_fc() function. It will rename and bind together all files so only one file needs to be loaded into EcoDAAT per year. It is recommended that all QA/QC check have been done before and that the function fill_missing_stations() has been run to correct for missing haul information. 
+
+**Usage**
+```{r, eval= FALSE}
+to_ecodaat("path/ to directory/of current years fastcat/ dataframes")
+
+```
+
+plot_time_series()
+---
+Use this function when you have historical and the current years data available. The function creates either temperature or salinity plots of core EcoFOCI stations in the Gulf of Alaska. Each plot displays the average temperature or salinity for each meter of depth of the core stations for each year for the months when peak sampling of these regions occured. Line 8 and Semidi area are most commonly sampled in May and June, which is considered Spring. Summer sampling in the Gulf of Alaska has been less frequent and starts in the early 2000's. This summer sampling is in the Semidi core area, summer is considered August and September.Post 2010, these core stations were only sampled in odd numbered years. In the future more core areas will be added. 
+
+**Usage**
+```{r, eval= FALSE}
+plot_time_series(hist_data = "path/ to directory/of historical .csv", 
+                 fastcat_data = "path to/ current years/fastcat .csv",
+                 core_stations = "Line 8",
+                 plot_type = "Temperature")
+
+```
+
 
 Using FastrCAT at Sea
 ---
