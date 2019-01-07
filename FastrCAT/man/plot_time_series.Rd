@@ -18,8 +18,7 @@ Core areas are all in bottom depth at or greater than 100 and less than 150
 meters. Salintiy or temperature data from the surface to 100m will be shown.
 core_stations are as follows: "Line 8 FOX", "Line 8", "Semidi Spring" and
 "Semidi Summer".
-Line 8 FOX is a set of six stations  with a bounding box of `57.52, -155.2,
-57.72, -154.85`. Line 8 are the 4 core stations of Line 8 FOX. Semidi are
+Line 8 FOX is a set of six stations  with a bounding box of \code{57.52, -155.2, 57.72, -154.85}. Line 8 are the 4 core stations of Line 8 FOX. Semidi are
 6- 8 stations centrally located in the Semidi area and have been consistently
 sampled, with a bounding box of '55.1, -158.5, 55.9, -158.0'.}
 

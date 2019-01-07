@@ -2,7 +2,7 @@
 % Please edit documentation in R/fill_missing_stations.R
 \name{fill_missing_stations}
 \alias{fill_missing_stations}
-\title{Fill in missing station, foci grid, and haul names}
+\title{Fill in missing station, foci grid, and haul names.}
 \usage{
 fill_missing_stations(path_fc, path_haul_rcds)
 }
@@ -20,5 +20,7 @@ hauls names have been corrected.
 \description{
 Takes the .csv file created with make_dataframe_fc() and
 haul records queried from EcoDAAT and finds and replaces missing
-station names, foci grid names, and haul numbers in the dataframe.
+station names, foci grid names, and haul numbers in the dataframe. Make
+sure that haul records are available for cruise. This is part of the
+quality/control process prior to the data being ready for EcoDAAT.
 }
