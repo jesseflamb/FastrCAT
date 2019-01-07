@@ -39,7 +39,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE){
 # Retrieve data from each file ------------------------------------------------
   for(i in 1:length(temp)){
 
-    full_table <- read_lines(temp[i])
+    full_table <- readr::read_lines(temp[i])
 
 # Determines if file contains data --------------------------------------------
     if(length(file.size(full_table)) == 0){
