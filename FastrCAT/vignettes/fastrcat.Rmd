@@ -45,6 +45,10 @@ Functions in FastrCAT
   
   `fill_missing_stations()`
   
+  `to_ecodaat()`
+  
+  `plot_time_series()`
+  
 
 make_dataframe_fc()
 ---	
