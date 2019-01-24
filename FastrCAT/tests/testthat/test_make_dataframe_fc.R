@@ -1,6 +1,6 @@
 
 make_dataframe_fc(system.file("extdata", package = "FastrCAT"),
-                  GE = TRUE, Cruise_report = FALSE, DF = FALSE)
+                                GE = FALSE, Cruise_report = TRUE, DF = TRUE)
 
 test_that(
     "Dataframe and function object have same dimensions.",{
