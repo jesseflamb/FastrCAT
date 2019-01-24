@@ -18,10 +18,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r, echo=FALSE, eval=FALSE}
-htmltools::img(src = knitr::image_uri("mermaidcat.png"), 
-               alt = 'mermaidcat', 
-               style = 'position:absolute; top: 0; right:0; padding:5px;')
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("hex_sticker_color.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px;')
 ```
 
 **Abstract**
