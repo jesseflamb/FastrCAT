@@ -1,5 +1,5 @@
 # FastrCAT
-An R package with functions to bind together .up files from SeaBird FastCATs, QA/QC data, make temperature/salinity plots, and maps of indices.
+An R package with functions to bind together .up files from SeaBird FastCATs, QA/QC data, make temperature/salinity plots, and maps of indices. View the [vignette]("https://github.com/Copepoda/FastrCAT/blob/master/FastrCAT/vignettes/fastrcat.pdf") for FastrCAT.
 
 Disclaimer  
 
