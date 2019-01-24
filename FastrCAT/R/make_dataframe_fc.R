@@ -439,7 +439,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 
 # Bind together bad salinity and temperature for error table ------------------
 
-    if(dim(bad_temperature[1] != 0 & dim(bad_salinity)[1] != 0)){
+    if(dim(bad_temperature)[1] != 0 & dim(bad_salinity)[1] != 0){
 
       bad_sal_temp <- bad_temperature %>% dplyr::bind_rows(bad_salinity)%>%
         as.data.frame(.)
