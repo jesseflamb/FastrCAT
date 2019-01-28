@@ -1,4 +1,0 @@
-FastrCAT                FastrCAT: A package for the Analysis of
-                        Oceanographic data from FastCATs.
-make_dataframe_fc       Create a Dataframe from .up files
-plot_ts_fc              Temperature/Salinity by Depth Plots
