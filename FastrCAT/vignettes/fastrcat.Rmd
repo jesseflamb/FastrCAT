@@ -6,8 +6,8 @@ output: rmarkdown::html_vignette
 fig_caption: yes
 vignette: >
   %\VignetteIndexEntry{FastrCAT}
-  %\VignetteEngine{rmarkdown::render}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::knitr}
+  %\usepackage[utf8]{inputenc}
 ---
 
 
@@ -159,7 +159,7 @@ Here is an example of a sampling intensity map. Scales for legend will always be
 
 ```{r echo=FALSE, fig.cap= "Sample Intensity Map", fig.show='hold'}
 
-knitr::include_graphics("DY15-05_Sample Intensity.png")
+knitr::include_graphics("DY15-05_Sample_Intensity.png")
 
 ```
 
