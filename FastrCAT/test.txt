@@ -1,3 +1,0 @@
-These values for salinity and temperature are outside of known ranges. 
-         NA's refer to no values within that portion of the range.
-
