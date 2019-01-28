@@ -4,7 +4,7 @@
 \alias{fill_missing_stations}
 \title{Fill in missing station, foci grid, and haul names.}
 \usage{
-fill_missing_stations(path_fc, path_haul_rcds)
+fill_missing_stations(path_fc, path_haul_records)
 }
 \arguments{
 \item{path_fc}{The path to the directory where the .csv file

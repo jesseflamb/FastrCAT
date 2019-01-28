@@ -35,13 +35,14 @@ plot_ts_fc <- function(current_path){
 # Load data -------------------------------------------------------------------
 
   fc_dataframe <- readr::read_csv(to_datadframe,
-                                  col_types = cols(CRUISE = col_character(),
-                                                   STATION_NAME = col_integer(),
-                                                   HAUL_NAME = col_integer(),
-                                                   FOCI_GRID = col_character(),
-                                                   DEPTH = col_integer(),
-                                                   TEMPERATURE1 = col_double(),
-                                                   SALINITY1 = col_double()))%>%
+                                  col_types = readr::cols(
+                                    CRUISE = readr::col_character(),
+                                    STATION_NAME = readr::col_integer(),
+                                    HAUL_NAME = readr::col_integer(),
+                                    FOCI_GRID = readr::col_character(),
+                                    DEPTH = readr::col_integer(),
+                                    TEMPERATURE1 = readr::col_double(),
+                                    SALINITY1 = readr::col_double()))%>%
                     dplyr::select(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID,
                                  DEPTH, TEMPERATURE1, SALINITY1, DIRECTORY)%>%
                     tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
