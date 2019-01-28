@@ -34,13 +34,13 @@ test_that(
 
 test_that(
   "FOCI_GRID is atomic class character",{
-    expect_true(is.integer(fastcat_data[,"FOCI_GRID"]))
+    expect_true(is.character(fastcat_data[,"FOCI_GRID"]))
   }
 )
 
 test_that(
   "DATE is class POSIXct",{
-    expect_true(is.POSIXct(fastcat_data[,"DATE"]))
+    expect_true(lubridate::is.POSIXct(fastcat_data[,"DATE"]))
   }
 )
 
