@@ -8,6 +8,10 @@
 #' @section FastrCAT functions
 #' make_dataframe_fc()
 #' plot_ts_fc()
+#' map_fc()
+#' plot_time_series()
+#' fill_missing_stations()
+#' to_ecodaat()
 #'
 #' @docType package
 #' @name FastrCAT
