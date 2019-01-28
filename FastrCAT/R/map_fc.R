@@ -34,17 +34,18 @@ fc_data <- readr::read_csv(list.files(path = current_path,
                                       ignore.case = TRUE,
                                       include.dirs = TRUE,
                                       full.names = TRUE),
-                    col_types = cols_only(CRUISE = col_character(),
-                                     STATION_NAME = col_integer(),
-                                     HAUL_NAME = col_integer(),
-                                     FOCI_GRID = col_character(),
-                                     DATE = col_date(),
-                                     LAT = col_double(),
-                                     LON = col_double(),
-                                     DEPTH_BOTTOM = col_integer(),
-                                     DEPTH = col_integer(),
-                                     TEMPERATURE1 = col_double(),
-                                     SALINITY1 = col_double()))
+                                    col_types = readr::cols_only(
+                                     CRUISE = readr::col_character(),
+                                     STATION_NAME = readr::col_integer(),
+                                     HAUL_NAME = readr::col_integer(),
+                                     FOCI_GRID = readr::col_character(),
+                                     DATE = readr::col_date(),
+                                     LAT = readr::col_double(),
+                                     LON = readr::col_double(),
+                                     DEPTH_BOTTOM = readr::col_integer(),
+                                     DEPTH = readr::col_integer(),
+                                     TEMPERATURE1 = readr::col_double(),
+                                     SALINITY1 = readr::col_double()))
 
 # Check for plot folder--------------------------------------------------------
 
