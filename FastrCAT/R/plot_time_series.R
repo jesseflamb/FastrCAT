@@ -35,7 +35,7 @@
 #' be written to the folder designated by the historical data file path. The
 #' plot will be in .png format. It should be noted that the plot throws out
 #' the 0 depth value. 0 depth can and has been problematic for fastcat data.
-
+#' @export plot_time_series
 
 plot_time_series <- function(hist_data, core_stations, plot_type,
                              fastcat_data = FALSE, anomaly = FALSE){
@@ -66,24 +66,24 @@ range_filter <- if(core_stations == "Line 8"){ # 4 FOX stations + 2
   time_data %>%
     dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
     dplyr::filter(LON >= -155.2673 & LON <= -154.7725)%>%
-    dplyr::filter(month(DATE) %in% c(5,6)) #May and June
+    dplyr::filter(lubridate::month(DATE) %in% c(5,6)) #May and June
 } else if (core_stations == "Line 8 FOX"){ # 4 Stations
   time_data %>%
     dplyr::filter(LAT >= 57.52417 & LAT <= 57.71517)%>%
     dplyr::filter(LON >= -155.2 & LON <= -154.85)%>%
-    dplyr::filter(month(DATE) %in% c(5,6)) #May and June
+    dplyr::filter(lubridate::month(DATE) %in% c(5,6)) #May and June
 } else if(core_stations == "Semidi Spring"){ # .5 x 1 degree area
   time_data %>%
     dplyr::filter(LAT >= 55.2 & LAT <= 57.2)%>%
     dplyr::filter(LON >= -159 & LON <= -158)%>%
-    dplyr::filter(month(DATE) %in% c(5,6))%>% #May and June
+    dplyr::filter(lubridate::month(DATE) %in% c(5,6))%>% #May and June
     dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
 
 } else if(core_stations == "Semidi Summer"){
   time_data %>%
     dplyr::filter(LAT >= 55.2 & LAT <= 57.2)%>%
     dplyr::filter(LON >= -159 & LON <= -158)%>%
-    dplyr::filter(month(DATE) %in% c(8,9))%>% #August and September
+    dplyr::filter(lubridate::month(DATE) %in% c(8,9))%>% #August and September
     dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
 }
 
@@ -95,7 +95,7 @@ plot_data <- if(plot_type == "temperature"){
 
   range_filter %>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
-    dplyr::group_by(year(DATE), DEPTH)%>%
+    dplyr::group_by(lubridate::year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
   }else if(anomaly == TRUE){
     # place anomaly equation here
@@ -107,7 +107,7 @@ plot_data <- if(plot_type == "temperature"){
 
   range_filter %>%
     dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
-    dplyr::group_by(year(DATE), DEPTH)%>%
+    dplyr::group_by(lubridate::year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
   }else if(anomaly == TRUE){
     # place anomaly equation here
@@ -166,7 +166,7 @@ name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_", plot
 # Time series plot ------------------------------------------------------------
 
 time_series_plot <- ggplot2::ggplot()+
-  ggplot2::geom_tile(aes(x = `year(DATE)`, y = -(DEPTH), fill = mean_yr),
+  ggplot2::geom_tile(ggplot2::aes(x = `year(DATE)`, y = -(DEPTH), fill = mean_yr),
                      data = plot_data)+
   ggplot2::scale_fill_gradientn(colors = plot_color, name = legend_name)+
   ggplot2::scale_y_continuous(breaks = -(seq(0,100 ,by = 10)),
@@ -176,14 +176,14 @@ time_series_plot <- ggplot2::ggplot()+
   ggplot2::xlab(label = "Year")+
   ggplot2::ggtitle(label = core_stations)+
   ggplot2::theme(
-    axis.text.y = element_text(face = "bold", size = 14),
-    axis.text.x = element_text(face = "bold", size = 14),
-    axis.title.x  = element_text(face = "bold", size = 14),
-    axis.title.y  = element_text(face = "bold", size = 14),
-    title = element_text(face = "bold", size = 18),
-    legend.key.height = unit(2, "cm"),
-    legend.key.width = unit(0.75, "cm"),
-    legend.text = element_text(face = "bold", size = 12))
+    axis.text.y = ggplot2::element_text(face = "bold", size = 14),
+    axis.text.x = ggplot2::element_text(face = "bold", size = 14),
+    axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
+    axis.title.y  = ggplot2::element_text(face = "bold", size = 14),
+    title = ggplot2::element_text(face = "bold", size = 18),
+    legend.key.height = ggplot2::unit(2, "cm"),
+    legend.key.width = ggplot2::unit(0.75, "cm"),
+    legend.text = ggplot2::element_text(face = "bold", size = 12))
 
 
 grDevices::png(filename = name_time_series_plot, width = 600, height = 600,
