@@ -22,6 +22,7 @@
 #' desired depth range. For example a depth range of 5-10 meters would be
 #' entered as such c(5,10).
 #' @return A map of the desired type and depth range for a single cruise.
+#' @export map_fc
 
 
 
@@ -279,10 +280,10 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 map_choice <- if(map_type == "Stations"){
 
   ggplot2::ggplot()+
-    ggplot2::geom_point(aes(LON, LAT), size = 2, shape = 21,
+    ggplot2::geom_point(ggplot2::aes(LON, LAT), size = 2, shape = 21,
                                       color = "black", fill = "#7394b5",
                                       data = map_data)#+
-    #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL),
+    #ggrepel::geom_text_repel(ggplot2::aes(LON, LAT, label = STATION_HAUL),
                              #size = 5, color = "black",
                              #data = station_map)
 
@@ -297,7 +298,7 @@ map_choice <- if(map_type == "Stations"){
   if(length(unique(map_data$CRUISE)) <= 2){
 
   ggplot2::ggplot()+
-    ggplot2::geom_hex(aes(LON, LAT), binwidth = 0.5, alpha = 0.9,
+    ggplot2::geom_hex(ggplot2::aes(LON, LAT), binwidth = 0.5, alpha = 0.9,
                       data = map_data)+
     ggplot2::scale_fill_gradientn(colors = intensity_color,
                                   breaks = seq(1,10, by = 2),
@@ -311,7 +312,7 @@ map_choice <- if(map_type == "Stations"){
   }else{
 
     ggplot2::ggplot()+
-      ggplot2::geom_hex(aes(LON, LAT), binwidth = 1, alpha = 0.9,
+      ggplot2::geom_hex(ggplot2::aes(LON, LAT), binwidth = 1, alpha = 0.9,
                         data = map_data)+
       ggplot2::scale_fill_gradientn(colors = intensity_color,
                                     breaks = seq(1,40, by = 5),
@@ -336,9 +337,9 @@ map_choice <- if(map_type == "Stations"){
                       "#91CF6C", "#B0D66C", "#CCDE78", "#E6E58A", "#FEEEA0")
 
   ggplot2::ggplot()+
-    ggplot2::geom_tile(aes(x = LON, y = LAT, fill = SALINITY1), size = 1,
+    ggplot2::geom_tile(ggplot2::aes(x = LON, y = LAT, fill = SALINITY1), size = 1,
             data = map_data)+
-    ggplot2::geom_contour(aes(x = LON, y = LAT, z = SALINITY1),
+    ggplot2::geom_contour(ggplot2::aes(x = LON, y = LAT, z = SALINITY1),
                           binwidth = 0.5,data = map_data,
                  color = "#f0ead6", size = .5)+
     ggplot2::scale_fill_gradientn(colors = salinity_color,
@@ -366,9 +367,9 @@ map_choice <- if(map_type == "Stations"){
                          "#A23925", "#931A11", "#7B0413", "#5D0311", "#41000B")
 
   ggplot2::ggplot()+
-    ggplot2::geom_tile(aes(x = LON, y = LAT, fill = TEMPERATURE1), size = 1,
+    ggplot2::geom_tile(ggplot2::aes(x = LON, y = LAT, fill = TEMPERATURE1), size = 1,
                        data = map_data)+
-    ggplot2::geom_contour(aes(x = LON, y = LAT, z = TEMPERATURE1),
+    ggplot2::geom_contour(ggplot2::aes(x = LON, y = LAT, z = TEMPERATURE1),
                           binwidth = 1, data = map_data,
                           color = "#4c7f7f", size = .25)+
     ggplot2::scale_fill_gradientn(colors = temperature_color,
@@ -397,10 +398,10 @@ fc_map <- map_choice +
               ggplot2::ylab(label = "Latitude")+
               ggplot2::ggtitle(label = map_title)+
               ggplot2::theme(
-                axis.text.y = element_text(face = "bold", size = 12),
-                axis.text.x = element_text(face = "bold", size = 12),
-                axis.title = element_text(face = "bold", size = 12),
-                title = element_text(face = "bold", size = 14))
+                axis.text.y = ggplot2::element_text(face = "bold", size = 12),
+                axis.text.x = ggplot2::element_text(face = "bold", size = 12),
+                axis.title = ggplot2::element_text(face = "bold", size = 12),
+                title = ggplot2::element_text(face = "bold", size = 14))
 
 # write map to file-------------------------------------------------------
 png(filename = map_dir_name, width = 600, height = 600, units = "px",
