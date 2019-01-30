@@ -22,6 +22,14 @@
 #' environment in conjunction with GE set to TRUE.
 #' @return .csv file of all .up file data. An .html file with a cruise
 #' summary and data QAQC output.
+#' @importFrom magrittr %$%
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices png
+#' @importFrom utils read.table
+#' @importFrom stats na.omit
+#' @importFrom stats qnorm
+#' @importFrom stats sd
+#' @export make_dataframe_fc
 
 
 
@@ -490,7 +498,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
   if(Cruise_report == TRUE){
 # Make cruise summary and summary stats text ----------------------------------
   summary_fc <- summary(cruise_data_all %>%
-                        select(LAT, LON, DEPTH_BOTTOM, DEPTH, PRESSURE,
+                        dplyr::select(LAT, LON, DEPTH_BOTTOM, DEPTH, PRESSURE,
                                TEMPERATURE1, SALINITY1,  CONDUCTIVITY1, SIGMA_T))
   summary_fc <- summary_fc[-c(2,5),]
 
@@ -572,22 +580,22 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 
 
   ts_plot <- ggplot2::ggplot(plot_data)+
-    ggplot2::geom_ribbon(aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
+    ggplot2::geom_ribbon(ggplot2::aes(-(DEPTH), ymin = CI_5, ymax = CI_95, color = TYPE, fill = TYPE),
                          alpha = 0.5)+
-    ggplot2::geom_point(aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
+    ggplot2::geom_point(ggplot2::aes(-(DEPTH), MEAN, color = TYPE, fill = TYPE), shape = 21, size = 3,
                         alpha = 0.8)+
     ggplot2::scale_color_manual(values = plot_colors)+
     ggplot2::scale_fill_manual(values = plot_colors)+
     ggplot2::coord_flip()+
     ggplot2::theme_bw()+
     ggplot2::theme(
-      axis.text.y = element_text(face = "bold", size = 12),
-      axis.text.x = element_text(face = "bold", size = 12),
-      axis.title.x  = element_text(face = "bold", size = 14),
-      axis.title.y  = element_text(face = "bold", size = 14),
-      title = element_text(face = "bold", size = 18),
-      strip.background = element_blank(),
-      strip.text = element_blank(),
+      axis.text.y = ggplot2::element_text(face = "bold", size = 12),
+      axis.text.x = ggplot2::element_text(face = "bold", size = 12),
+      axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
+      axis.title.y  = ggplot2::element_text(face = "bold", size = 14),
+      title = ggplot2::element_text(face = "bold", size = 18),
+      strip.background = ggplot2::element_blank(),
+      strip.text = ggplot2::element_blank(),
       legend.position = "none")+
     ggplot2::xlab(label = "Depth [m]")+
     ggplot2::ylab(label = expression(bold(paste("Salinity[PSU]",
@@ -637,18 +645,18 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                                 unit_category = "metric")+
     ggplot2::coord_sf(xlim = fc_xlim, ylim = fc_ylim)+
-    ggplot2::geom_point(aes(LON, LAT), size = 4, shape = 21, color = "black",
+    ggplot2::geom_point(ggplot2::aes(LON, LAT), size = 4, shape = 21, color = "black",
                         fill = "gray", data = Station_map)+
-    #ggrepel::geom_text_repel(aes(LON, LAT, label = STATION_HAUL), size = 4,
+    #ggrepel::geom_text_repel(ggplot2::aes(LON, LAT, label = STATION_HAUL), size = 4,
                              #color = "black",data = Station_map)+
     ggplot2::theme_bw()+
     ggplot2::xlab(label = "Longitude")+
     ggplot2::ylab(label = "Latitude")+
     ggplot2::theme(
-      axis.text.y = element_text(face = "bold", size = 12),
-      axis.text.x = element_text(face = "bold", size = 12),
-      axis.title.x  = element_text(face = "bold", size = 14),
-      axis.title.y  = element_text(face = "bold", size = 14))
+      axis.text.y = ggplot2::element_text(face = "bold", size = 12),
+      axis.text.x = ggplot2::element_text(face = "bold", size = 12),
+      axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
+      axis.title.y  = ggplot2::element_text(face = "bold", size = 14))
 
 # Cruise Summary, in Rmarkdown format -----------------------------------------
   cruise_report <- c(
@@ -757,6 +765,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 # Data to the global environment ----------------------------------------------
   if(GE == TRUE){
     fastcat_data <<- as.data.frame(dplyr::bind_rows(cruise_data))
+
   }
 
 # Makes the file name ---------------------------------------------------------
