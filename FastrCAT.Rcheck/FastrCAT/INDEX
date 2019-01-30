@@ -1,0 +1,9 @@
+FastrCAT                FastrCAT: A package for the analysis of
+                        oceanographic data fromo FastCAT's.
+fill_missing_stations   Fill in missing station, foci grid, and haul
+                        names.
+make_dataframe_fc       Create a Dataframe from .up files
+map_fc                  Mapping of FastCAT data
+plot_time_series        GOA Time Series Plots
+plot_ts_fc              Temperature/Salinity by Depth Plots
+to_ecodaat              Prepare FastrCAT data for EcoDAAT
