@@ -13,6 +13,7 @@
 #' @return A plot of temperature and salinity by depth for each
 #' station of a cruise. Plots are written in the plot folder and
 #' are in the .png format.
+#' @export plot_ts_fc
 
 
 plot_ts_fc <- function(current_path){
@@ -124,22 +125,22 @@ plot_ts_fc <- function(current_path){
 # Plot data --------------------------------------------------------------------
 
   ts_plot <- ggplot2::ggplot(data = filtered_data)+
-    ggplot2::geom_path(aes(MEASURMENT, -(DEPTH), color = TYPE), size = 2,
+    ggplot2::geom_path(ggplot2::aes(MEASURMENT, -(DEPTH), color = TYPE), size = 2,
                       alpha = 0.6)+
-    ggplot2::geom_point(aes(MEASURMENT,-(DEPTH), color = TYPE), shape = 1,
+    ggplot2::geom_point(ggplot2::aes(MEASURMENT,-(DEPTH), color = TYPE), shape = 1,
                         size = 4)+
     ggplot2::scale_y_continuous(breaks = depth_breaks,
                        labels = depth_labels)+
     ggplot2::scale_color_manual(values = plot_colors)+
     ggplot2::theme_bw()+
     ggplot2::theme(
-           axis.text.y = element_text(face = "bold", size = 12),
-           axis.text.x = element_text(face = "bold", size = 12),
-           axis.title.x  = element_text(face = "bold", size = 14),
-           axis.title.y  = element_text(face = "bold", size = 14),
-           title = element_text(face = "bold", size = 18),
-           strip.background = element_blank(),
-           strip.text = element_blank(),
+           axis.text.y = ggplot2::element_text(face = "bold", size = 12),
+           axis.text.x = ggplot2::element_text(face = "bold", size = 12),
+           axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
+           axis.title.y  = ggplot2::element_text(face = "bold", size = 14),
+           title = ggplot2::element_text(face = "bold", size = 18),
+           strip.background = ggplot2::element_blank(),
+           strip.text = ggplot2::element_blank(),
            legend.position = "none")+
     ggplot2::ylab(label = "Depth [m]")+
     ggplot2::xlab(label = expression(bold(paste("Salinity[PSU]",
