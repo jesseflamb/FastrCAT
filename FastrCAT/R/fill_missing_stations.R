@@ -12,6 +12,7 @@
 #' @return a dataframe in .csv format where missing station, foci grid, and
 #' hauls names have been corrected.
 #' @importFrom magrittr %>%
+#' @export fill_missing_stations
 
 
 fill_missing_stations <- function(path_fc, path_haul_records){
