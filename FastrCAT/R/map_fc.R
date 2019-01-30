@@ -405,7 +405,7 @@ fc_map <- map_choice +
 
 # write map to file-------------------------------------------------------
 png(filename = map_dir_name, width = 600, height = 600, units = "px",
-    bg = "transparent")
+    res = 800, bg = "transparent")
 
 print(fc_map)
 
