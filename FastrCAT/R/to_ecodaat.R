@@ -10,7 +10,7 @@
 #' located.
 #' @return a single .csv files and a ReadMe file of information about the
 #' .csv file.
-
+#' @export to_ecodaat
 
 to_ecodaat <- function(fc_data_path){
 
