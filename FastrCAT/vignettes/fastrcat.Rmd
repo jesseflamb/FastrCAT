@@ -160,7 +160,7 @@ Here is an example of a sampling intensity map. Scales for legend will always be
 
 ```{r echo=FALSE, fig.cap= "Sample Intensity Map", fig.show='hold'}
 
-knitr::include_graphics("DY1705_Sample_Intensity.png")
+knitr::include_graphics("DY1705_SampleIntensity.png")
 
 ```
 
