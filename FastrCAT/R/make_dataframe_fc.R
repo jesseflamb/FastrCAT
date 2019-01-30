@@ -764,8 +764,8 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 
 # Data to the global environment ----------------------------------------------
   if(GE == TRUE){
-    fastcat_data <- as.data.frame(dplyr::bind_rows(cruise_data))
-    return(fastcat_data)
+    fastcat_data <<- as.data.frame(dplyr::bind_rows(cruise_data))
+
   }
 
 # Makes the file name ---------------------------------------------------------
