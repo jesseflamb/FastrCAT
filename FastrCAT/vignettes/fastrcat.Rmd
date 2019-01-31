@@ -117,7 +117,7 @@ Provides a short paragraph of number of tows, salinity, temperature, and locatio
 **Example of Cruise Summary**
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::asis_output(htmltools::includeHTML("DY16-06_Cruise_Report.html"))
+knitr::asis_output(htmltools::includeHTML("DY15-05_Cruise_Report.html"))
 ```
 
 
