@@ -114,15 +114,15 @@ map_title <- if(map_type == "Stations" | map_type == "Sample Intensity"){
     } else if(map_type == "Salinity" & is.na(depth_range[1]) |
               map_type == "Temperature" & is.na(depth_range[1])){
 
-    paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type,
+    paste("Cruise ",unique(fc_data$CRUISE), ": ","Mean ", map_type,
          ", total water column",sep = "")
 
     } else if(map_type == "Salinity" & !is.na(depth_range[1]) |
               map_type == "Temperature" & !is.na(depth_range[1])){
 
-    paste("Cruise ",unique(fc_data$CRUISE), ": ",map_type," ",
+    paste("Cruise ",unique(fc_data$CRUISE), ": ", "Mean ", map_type," ",
         min(depth_range, na.rm = TRUE), " to ",
-        max(depth_range, na.rm = TRUE), " m depth", sep = "")
+        max(depth_range, na.rm = TRUE), " meters depth", sep = "")
   }
 
 # Dataframes and calculations for each map_type -------------------------------
@@ -185,9 +185,9 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
   idw.output <- as.data.frame(idw)
   names(idw.output)[1:3] <- c("LON","LAT","SALINITY1")
 
-  # Makes a .35 degree buffer around each station------------------------------
+  # Makes a .4 degree buffer around each station------------------------------
   IDW_buff_WGS84 <- sf::st_as_sf(MAP_IDW, coords = c("LON","LAT"))%>%
-    sf::st_buffer(., .35)%>%
+    sf::st_buffer(., .4)%>%
     sf::st_as_sf(.)
 
   # Converts the idw dataframe to a raster and masks non-buffer area-----------
@@ -253,9 +253,9 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
   idw.output <- as.data.frame(idw)
   names(idw.output)[1:3] <- c("LON","LAT","TEMPERATURE1")
 
-  # Makes a .35 degree buffer around each station------------------------------
+  # Makes a .4 degree buffer around each station------------------------------
   IDW_buff_WGS84 <- sf::st_as_sf(MAP_IDW, coords = c("LON","LAT"))%>%
-    sf::st_buffer(., .35)%>%
+    sf::st_buffer(., .4)%>%
     sf::st_as_sf(.)
 
   # Converts the idw dataframe to a raster and masks non-buffer area-----------
@@ -388,7 +388,7 @@ map_choice <- if(map_type == "Stations"){
 # map--------------------------------------------------------------------------
 
 fc_map <- map_choice +
-              ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
+              ggplot2::geom_sf(color = "#434e57", data = BATH_200[3], alpha = 0)+
               ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
               ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
                               unit_category = "metric")+
@@ -400,12 +400,15 @@ fc_map <- map_choice +
               ggplot2::theme(
                 axis.text.y = ggplot2::element_text(face = "bold", size = 12),
                 axis.text.x = ggplot2::element_text(face = "bold", size = 12),
-                axis.title = ggplot2::element_text(face = "bold", size = 12),
-                title = ggplot2::element_text(face = "bold", size = 14))
+                axis.title = ggplot2::element_text(face = "bold", size = 14),
+                title = ggplot2::element_text(face = "bold", size = 14),
+                legend.key.height =  ggplot2::unit(36, "mm"),
+                legend.key.width = ggplot2::unit(8, "mm"),
+                legend.text = ggplot2::element_text(face = "bold", size = 12))
 
 # write map to file-------------------------------------------------------
-png(filename = map_dir_name, width = 600, height = 600, units = "px",
-    res = 800, bg = "transparent")
+png(filename = map_dir_name, width = 250, height = 250, units = "mm",
+    res = 350, bg = "transparent")
 
 print(fc_map)
 
