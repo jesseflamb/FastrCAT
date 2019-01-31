@@ -19,9 +19,9 @@ Type 'q()' to quit R.
 > library(FastrCAT)
 > 
 > test_check("FastrCAT")
-== testthat results  =============
+== testthat results  ================================================================
 OK: 20 SKIPPED: 0 FAILED: 0
 > 
 > proc.time()
    user  system elapsed 
-   1.74    0.46    2.29 
+   1.66    0.46    2.16 
