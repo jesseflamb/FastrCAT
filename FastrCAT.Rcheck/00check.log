@@ -61,27 +61,10 @@ make_dataframe_fc: no visible binding for '<<-' assignment to
 * checking files in 'vignettes' ... OK
 * checking examples ... NONE
 * checking for unstated dependencies in 'tests' ... OK
-* checking tests ... ERROR
+* checking tests ... OK
   Running 'testthat.R'
-Running the tests in 'tests/testthat.R' failed.
-Last 13 lines of output:
-  == testthat results  =================================================================================================================
-  OK: 0 SKIPPED: 0 FAILED: 20
-  1. Error: Dataframe and function object have same dimensions. (@test_make_dataframe_fc.R#7) 
-  2. Error: Dataframe and function object are both dataframes (@test_make_dataframe_fc.R#13) 
-  3. Error: CRUISE column is atomic class character (@test_make_dataframe_fc.R#19) 
-  4. Error: STATION_NAME is atomic class character (@test_make_dataframe_fc.R#25) 
-  5. Error: HAUL_NAME is atomic class integer (@test_make_dataframe_fc.R#31) 
-  6. Error: FOCI_GRID is atomic class character (@test_make_dataframe_fc.R#37) 
-  7. Error: DATE is class POSIXct (@test_make_dataframe_fc.R#43) 
-  8. Error: TIME is class atomic class character (@test_make_dataframe_fc.R#49) 
-  9. Error: LAT is class atomic class numeric (@test_make_dataframe_fc.R#55) 
-  1. ...
-  
-  Error: testthat unit tests failed
-  Execution halted
 * checking for unstated dependencies in vignettes ... OK
 * checking package vignettes in 'inst/doc' ... OK
 * checking re-building of vignette outputs ... OK
 * DONE
-Status: 1 ERROR, 1 WARNING, 3 NOTEs
+Status: 1 WARNING, 3 NOTEs
