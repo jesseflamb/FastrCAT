@@ -23,4 +23,5 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "CI_5", "CI_95",
                                                         "TIME", "TYPE",
                                                         "Uniq_ID", "depth",
                                                         "mean_yr",
-                                                        "year(DATE)"))
+                                                        "year(DATE)",
+                                                        'lubridate::year(DATE)'))
