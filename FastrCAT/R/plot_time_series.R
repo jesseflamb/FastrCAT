@@ -11,7 +11,10 @@
 #' areas will be added.
 #' @param hist_data Supply the path and .csv file name of the historical data
 #' in quotations. The historical data must be in the format created by
-#' the FastrCAT::make_dataframe_fc.
+#' the FastrCAT::make_dataframe_fc, which is the same format EcoDAAT exports.
+#' Historic data must be queried from EcoDAAT and saved as a .csv file. In the
+#' future there will be a direct link to the Oracle database where EcoDAAT data
+#' is housed.
 #' @param core_stations There are three core areas for the Gulf of Alaska which
 #' have been regularly sampled and are representative of the Gulf of Alaska.
 #' Core areas are all in bottom depth at or greater than 100 and less than 150
@@ -28,6 +31,10 @@
 #' fastcat data. Supply the path and .csv file name to the current years
 #' fastcat data. This must be in the format created by the FastrCAT function
 #' make_dataframe_fc.
+#' @param min_depth Minimum depth which is shown on the plot. The default is set
+#' as 0 meters.
+#' @param max_depth Maximum depth which is displayed on the plot. The default
+#' is set at 100 meters.
 #' @param anomaly An optional argument if you want the anomaly of the plot_type
 #' selected. This argument is set to FALSE, when set to TRUE then the anomaly
 #' will be plotted. The anomoly is calculated using the ...something equation.
@@ -38,6 +45,7 @@
 #' @export plot_time_series
 
 plot_time_series <- function(hist_data, core_stations, plot_type,
+                             min_depth = 0, max_depth = 100,
                              fastcat_data = FALSE, anomaly = FALSE){
 
 fast_col_types <- readr::cols_only(
@@ -94,7 +102,7 @@ plot_data <- if(plot_type == "temperature"){
   if(anomaly == FALSE){
 
   range_filter %>%
-    dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
+    dplyr::filter(DEPTH <= max_depth & DEPTH > min_depth)%>%
     dplyr::group_by(lubridate::year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(TEMPERATURE1, na.rm = TRUE))
   }else if(anomaly == TRUE){
@@ -106,7 +114,7 @@ plot_data <- if(plot_type == "temperature"){
   if(anomaly == FALSE){
 
   range_filter %>%
-    dplyr::filter(DEPTH <= 100 & DEPTH > 0)%>%
+    dplyr::filter(DEPTH <= max_depth & DEPTH > min_depth)%>%
     dplyr::group_by(lubridate::year(DATE), DEPTH)%>%
     dplyr::summarise(mean_yr = mean(SALINITY1, na.rm = TRUE))
   }else if(anomaly == TRUE){
@@ -145,8 +153,8 @@ legend_name <- if(plot_type == "temperature"){
 }
 
 # time range of plot data, names different for each year ----------------------
-time_range <- paste(min(plot_data$`year(DATE)`), "_",
-                    max(plot_data$`year(DATE)`), sep = "")
+time_range <- paste(min(plot_data$`lubridate::year(DATE)`), "_",
+                    max(plot_data$`lubridate::year(DATE)`), sep = "")
 
 # the directory to send the plot to -------------------------------------------
 current_path <- unlist(stringr::str_split(hist_data, "/"))
@@ -160,13 +168,14 @@ if(dir.exists(paste(current_path,"/plots",sep = "")) == FALSE){
 }
 
 # name time series plot to write to file --------------------------------------
-name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_", plot_type,
-                               "_", time_range, ".png",sep = "")
+name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_",
+                               plot_type, "_", time_range, "_", min_depth,
+                               "to", max_depth,"m", ".png",sep = "")
 
 # Time series plot ------------------------------------------------------------
 
 time_series_plot <- ggplot2::ggplot()+
-  ggplot2::geom_tile(ggplot2::aes(x = `year(DATE)`, y = -(DEPTH), fill = mean_yr),
+  ggplot2::geom_tile(ggplot2::aes(x = `lubridate::year(DATE)`, y = -(DEPTH), fill = mean_yr),
                      data = plot_data)+
   ggplot2::scale_fill_gradientn(colors = plot_color, name = legend_name)+
   ggplot2::scale_y_continuous(breaks = -(seq(0,100 ,by = 10)),
@@ -174,20 +183,21 @@ time_series_plot <- ggplot2::ggplot()+
   ggplot2::theme_bw()+
   ggplot2::ylab(label = "Depth m")+
   ggplot2::xlab(label = "Year")+
-  ggplot2::ggtitle(label = core_stations)+
+  ggplot2::ggtitle(label = paste(core_stations,": from ", min_depth, " to ",
+                                 max_depth, " meters", sep = ""))+
   ggplot2::theme(
     axis.text.y = ggplot2::element_text(face = "bold", size = 14),
     axis.text.x = ggplot2::element_text(face = "bold", size = 14),
     axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
     axis.title.y  = ggplot2::element_text(face = "bold", size = 14),
     title = ggplot2::element_text(face = "bold", size = 18),
-    legend.key.height = ggplot2::unit(2, "cm"),
-    legend.key.width = ggplot2::unit(0.75, "cm"),
+    legend.key.height =  ggplot2::unit(38, "mm"),
+    legend.key.width = ggplot2::unit(8, "mm"),
     legend.text = ggplot2::element_text(face = "bold", size = 12))
 
 
-grDevices::png(filename = name_time_series_plot, width = 600, height = 600,
-               units = "px", bg = "transparent")
+grDevices::png(filename = name_time_series_plot, width = 250, height = 250,
+               units = "mm", res = 350, bg = "transparent")
 
 print(time_series_plot)
 
