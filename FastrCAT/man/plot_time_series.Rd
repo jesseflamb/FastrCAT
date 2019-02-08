@@ -4,8 +4,8 @@
 \alias{plot_time_series}
 \title{GOA Time Series Plots}
 \usage{
-plot_time_series(hist_data, core_stations, plot_type,
-  fastcat_data = FALSE, anomaly = FALSE)
+plot_time_series(hist_data, core_stations, plot_type, min_depth = 0,
+  max_depth = 100, fastcat_data = FALSE, anomaly = FALSE)
 }
 \arguments{
 \item{hist_data}{Supply the path and .csv file name of the historical data
@@ -24,6 +24,12 @@ sampled, with a bounding box of '55.1, -158.5, 55.9, -158.0'.}
 
 \item{plot_type}{will accept on of two quoted characters "temperature" or
 "salinity".}
+
+\item{min_depth}{Minimum depth which is shown on the plot. The default is set
+as 0 meters.}
+
+\item{max_depth}{Maximum depth which is displayed on the plot. The default
+is set at 100 meters.}
 
 \item{fastcat_data}{An optional argument if you want to add the current years
 fastcat data. Supply the path and .csv file name to the current years
