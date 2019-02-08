@@ -1,4 +1,4 @@
-#' @title GOA Time Series Plots
+#' @title Gulf of Alaska Time Series Heat Plots
 #' @description Creates either temperature or salinity plots of core EcoFOCI
 #' stations in the Gulf of Alaska. Each plot displays the average temperature
 #' or salinity for each meter of depth of the core stations for each year for
