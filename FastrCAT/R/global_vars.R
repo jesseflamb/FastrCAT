@@ -24,4 +24,6 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".", "CI_5", "CI_95",
                                                         "Uniq_ID", "depth",
                                                         "mean_yr",
                                                         "year(DATE)",
-                                                        'lubridate::year(DATE)'))
+                                                        'lubridate::year(DATE)',
+                                                        "SAMPLE_POINT", "VAR",
+                                                        "YEAR"))
