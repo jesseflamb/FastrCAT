@@ -186,17 +186,17 @@ time_series_plot <- ggplot2::ggplot()+
   ggplot2::ggtitle(label = paste(core_stations,": from ", min_depth, " to ",
                                  max_depth, " meters", sep = ""))+
   ggplot2::theme(
-    axis.text.y = ggplot2::element_text(face = "bold", size = 14),
-    axis.text.x = ggplot2::element_text(face = "bold", size = 14),
-    axis.title.x  = ggplot2::element_text(face = "bold", size = 14),
-    axis.title.y  = ggplot2::element_text(face = "bold", size = 14),
+    axis.text.y = ggplot2::element_text(face = "bold", size = 18),
+    axis.text.x = ggplot2::element_text(face = "bold", size = 18),
+    axis.title.x  = ggplot2::element_text(face = "bold", size = 20),
+    axis.title.y  = ggplot2::element_text(face = "bold", size = 20),
     title = ggplot2::element_text(face = "bold", size = 18),
     legend.key.height =  ggplot2::unit(38, "mm"),
     legend.key.width = ggplot2::unit(8, "mm"),
-    legend.text = ggplot2::element_text(face = "bold", size = 12))
+    legend.text = ggplot2::element_text(face = "bold", size = 16))
 
 
-grDevices::png(filename = name_time_series_plot, width = 250, height = 250,
+grDevices::png(filename = name_time_series_plot, width = 325, height = 250,
                units = "mm", res = 350, bg = "transparent")
 
 print(time_series_plot)
