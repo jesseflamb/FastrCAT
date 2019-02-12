@@ -161,7 +161,8 @@ if(dir.exists(paste(current_path,"/plots",sep = "")) == FALSE){
 # name time series plot to write to file --------------------------------------
 name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_",
                                plot_type, "_", time_range, "_", min_depth,
-                               "to", max_depth,"m", ".png",sep = "")
+                               "to", max_depth,"m",
+                               "box",".png",sep = "")
 
 
 box_plot_series <- ggplot2::ggplot(data = plot_data)+
