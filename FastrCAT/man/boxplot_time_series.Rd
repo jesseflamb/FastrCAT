@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxplot_time_series.R
 \name{boxplot_time_series}
 \alias{boxplot_time_series}
-\title{Gulf of Alaska Time Series Line Plot with Mean}
+\title{Gulf of Alaska Time Series Boxplot}
 \usage{
 boxplot_time_series(hist_data, core_stations, plot_type, min_depth = 0,
   max_depth = 100, fastcat_data = FALSE)
