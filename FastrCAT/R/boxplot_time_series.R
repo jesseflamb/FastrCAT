@@ -1,4 +1,4 @@
-#' @title Gulf of Alaska Time Series Line Plot with Mean
+#' @title Gulf of Alaska Time Series Boxplot
 #' @description Creates either temperature or salinity plots of core EcoFOCI
 #' stations in the Gulf of Alaska. Each plot displays the average temperature
 #' or salinity for each meter of depth of the core stations for each year for
@@ -144,8 +144,8 @@ name_y_axis <- if(plot_type == "temperature"){
 }
 
 # time range of plot data, names different for each year ----------------------
-time_range <- paste(min(plot_data$`lubridate::year(DATE)`), "_",
-                    max(plot_data$`lubridate::year(DATE)`), sep = "")
+time_range <- paste(min(plot_data$YEAR, na.rm = TRUE), "_",
+                    max(plot_data$YEAR, na.rm = TRUE), sep = "")
 
 # the directory to send the plot to -------------------------------------------
 current_path <- unlist(stringr::str_split(hist_data, "/"))
@@ -165,9 +165,9 @@ name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_",
 
 
 box_plot_series <- ggplot2::ggplot(data = plot_data)+
-  ggplot2::geom_hline(yintercept = median_plot_type - temp_SD, color = "blue",
+  ggplot2::geom_hline(yintercept = median_plot_type - sd_plot_type, color = "blue",
                       linetype = "dotted")+
-  ggplot2::geom_hline(yintercept = median_plot_type + temp_SD, color = "blue",
+  ggplot2::geom_hline(yintercept = median_plot_type + sd_plot_type, color = "blue",
                       linetype = "dotted")+
   ggplot2::geom_hline(yintercept = median_plot_type, color = "red", size = 1)+
   ggplot2::geom_boxplot(ggplot2::aes(factor(YEAR), VAR),
