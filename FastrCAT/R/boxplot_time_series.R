@@ -35,10 +35,14 @@
 #' as 0 meters.
 #' @param max_depth Maximum depth which is displayed on the plot. The default
 #' is set at 100 meters.
-#' @return A depth by year tile plot of temperature or salinity. The plot will
+#' @return A boxplot of temperature or salinity for each year. The width of the boxplot
+#' are proportional to year sample size. The line inside the boxplot is the median and
+#' the ends of the boxplot corresponds to the 25th and 75th percentiles. The
+#' whiskers extend to the largest or smallest observation greater than or equal
+#' 1.5 * Interquartile range. Outliers are circles in orange. The historical median
+#' for all years is red and the standard deviation is a blue dashed line.
 #' be written to the folder designated by the historical data file path. The
-#' plot will be in .png format. It should be noted that the plot throws out
-#' the 0 depth value. 0 depth can and has been problematic for fastcat data.
+#' plot will be in .png format.
 #' @export boxplot_time_series
 
 boxplot_time_series <- function(hist_data, core_stations, plot_type,
@@ -103,43 +107,40 @@ boxplot_time_series <- function(hist_data, core_stations, plot_type,
         tidyr::unite(col = "SAMPLE_POINT", CRUISE, STATION_NAME, HAUL_NAME,
                      FOCI_GRID, sep = ".")%>%
         dplyr::mutate(YEAR = lubridate::year(DATE))%>%
-        dplyr::select(YEAR, SAMPLE_POINT, TEMPERATURE1)
+        dplyr::select(YEAR, SAMPLE_POINT, TEMPERATURE1)%>%
+        dplyr::rename(VAR = TEMPERATURE1)
 
     } else if(plot_type == "salinity"){
 
       range_filter %>%
-        dplyr::filter(DEPTH <= max_depth & DEPTH > min_depth)
+        dplyr::filter(DEPTH <= max_depth & DEPTH > min_depth)%>%
+        tidyr::unite(col = "SAMPLE_POINT", CRUISE, STATION_NAME, HAUL_NAME,
+                     FOCI_GRID, sep = ".")%>%
+        dplyr::mutate(YEAR = lubridate::year(DATE))%>%
+        dplyr::select(YEAR, SAMPLE_POINT, SALINITY1)%>%
+        dplyr::rename(VAR = SALINITY1)
 
+    }
+
+# Median and standard deviation for historical values on boxplot
+  median_plot_type <- if(plot_type == "temperature"){
+    signif(stats::median(plot_data$VAR, na.rm = TRUE), digits = 2)
+  }else if (plot_type == "salinity"){
+    signif(stats::median(plot_data$VAR, na.rm = TRUE), digits = 2)
   }
 
-temp_mean <- signif(mean(plot_data$TEMPERATURE1, na.rm = TRUE), digits = 3)
-
-# temperature color pallete red to blue, did not use oce for temperature
-# it was decided red to blue was more intuitive. Salinity color ramp
-# is the salinity oce color ramp. ---------------------------------------------
-plot_color <- if(plot_type == "temperature"){
-
-  c("#0E0C71", "#1D159E", "#1D26C9", "#174CBB", "#2F63B3",
-    "#4977B2", "#658AB4", "#7F9DB9", "#9AAFC1", "#B6C3CD",
-    #"#D2D7DB" "#EEEDED" "#E0D2CF"
-    "#D6B8B1", "#CB9F93", "#C28676", "#B86E5A", "#AD543E",
-    "#A23925", "#931A11", "#7B0413", "#5D0311", "#41000B")
-
-}else if(plot_type == "salinity"){
-
-  c("#2B1470", "#2C1D8A", "#212F96", "#114293", "#08518F", "#0E5E8B",
-    "#1A6989", "#267488", "#318088", "#3A8B88", "#439787", "#4BA385",
-    "#56AF81", "#64BA7B", "#77C574", "#91CF6C", "#B0D66C", "#CCDE78",
-    "#E6E58A", "#FEEEA0")
-}
-
+  sd_plot_type <- if(plot_type == "temperature"){
+    signif(sd(plot_data$VAR, na.rm = TRUE), digits = 2)
+  }else if(plot_type == "salinity"){
+    signif(sd(plot_data$VAR, na.rm = TRUE), digits = 2)
+  }
 
 
 # expressions for either salinity or temperature legend -----------------------
-legend_name <- if(plot_type == "temperature"){
-  expression(bold( ~degree~C ))
+name_y_axis <- if(plot_type == "temperature"){
+  expression(bold(paste("Temperature ", ~degree~C ,sep = "" )))
 } else if (plot_type == "salinity"){
-  expression(bold("PSU"))
+  expression(bold(paste("Salinity ", "PSU")))
 }
 
 # time range of plot data, names different for each year ----------------------
@@ -163,6 +164,32 @@ name_time_series_plot <- paste(current_path, "/plots/", core_stations, "_",
                                "to", max_depth,"m", ".png",sep = "")
 
 
-ggplot2::ggplot(data = plot_data)+
-  ggplot2::geom_hline(yintercept = temp_mean)+
-  ggplot2::geom_boxplot(ggplot2::aes(factor(YEAR), TEMPERATURE1))
+box_plot_series <- ggplot2::ggplot(data = plot_data)+
+  ggplot2::geom_hline(yintercept = median_plot_type - temp_SD, color = "blue",
+                      linetype = "dotted")+
+  ggplot2::geom_hline(yintercept = median_plot_type + temp_SD, color = "blue",
+                      linetype = "dotted")+
+  ggplot2::geom_hline(yintercept = median_plot_type, color = "red", size = 1)+
+  ggplot2::geom_boxplot(ggplot2::aes(factor(YEAR), VAR),
+                        outlier.colour = "#d88c00", outlier.shape = 21, alpha = 0.8,
+                        varwidth = TRUE)+
+  ggplot2::theme_linedraw()+
+  ggplot2::ylab(label = name_y_axis)+
+  ggplot2::xlab(label = "Year")+
+  ggplot2::ggtitle(label = paste(core_stations,": from ", min_depth, " to ",
+                                 max_depth, " meters", sep = ""))+
+  ggplot2::theme(
+    axis.text.y = ggplot2::element_text(face = "bold", size = 18),
+    axis.text.x = ggplot2::element_text(face = "bold", size = 18),
+    axis.title.x  = ggplot2::element_text(face = "bold", size = 20),
+    axis.title.y  = ggplot2::element_text(face = "bold", size = 20),
+    title = ggplot2::element_text(face = "bold", size = 18))
+
+grDevices::png(filename = name_time_series_plot, width = 325, height = 250,
+               units = "mm", res = 350, bg = "transparent")
+
+print(box_plot_series)
+
+grDevices::dev.off()
+
+}
