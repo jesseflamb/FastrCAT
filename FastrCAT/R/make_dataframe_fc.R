@@ -685,12 +685,12 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     'Plot shows average salinity and temperature (point) and 95% Confidence',
     'Intervals for each integer of depth.',
     '',
-    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "all"}',
+    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "none"}',
     'print(suppressWarnings(ts_plot))',
     '```',
     '### Station Map',
     '',
-    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "all"}',
+    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "none"}',
     'print(suppressWarnings(fc_map))',
     '```',
     '',
@@ -754,8 +754,8 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 # Render Cruise Report --------------------------------------------------------
       markdown::markdownToHTML(text = knitr::knit(text = cruise_report),
                                output = paste(current_path, paste(cruise_id,
-                                        "Cruise_Report.html", sep = "_"),
-                                        sep = "/"))
+                                       "Cruise_Report.html", sep = "_"),
+                                       sep = "/"), fragment.only = TRUE)
   }
 # End of Cruise report^--------------------------------------------------------
 
