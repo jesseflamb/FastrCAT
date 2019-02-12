@@ -1,7 +1,7 @@
 ---
 title: "FastrCAT"
 author: "Nissa Ferm"
-date: "2019-02-11"
+date: "2019-02-12"
 output: rmarkdown::html_vignette
 fig_caption: yes
 vignette: >
@@ -52,6 +52,8 @@ Functions in FastrCAT
   
   `plot_time_series()`
   
+  `boxplot_time_series()`
+  
 
 make_dataframe_fc()
 ---	
@@ -61,7 +63,10 @@ This function writes a single data frame in .csv format to file containing ocean
 
 
 ```r
- make_dataframe_fc("path/ to directory/ of .up files")
+ make_dataframe_fc(current_path = "path/ to directory/ of .up files",
+                   GE = FALSE,
+                   Cruise_report = TRUE,
+                   DF = TRUE)
 ```
 
 Shows the first four rows and the first seven columns of an example dataframe. 
@@ -462,7 +467,9 @@ Once the make_dataframe_fc() has been run and the .csv file of the temperature, 
 
 
 ```r
- map_fc("path/ to directory/ of fastrcat dataframe", map_type = "Sample Intensity")
+ map_fc(current_path = "path/ to directory/ of fastrcat dataframe",
+        map_type = "Sample Intensity",
+        depth_range = NA)
 ```
 
 Here is an example of a sampling intensity map. Scales for legend will always be the same, for easy comparison among years. 
@@ -473,8 +480,9 @@ Here is an example of a temperature map. This map shows the average temperature 
 
 
 ```r
-map_fc("path/ to directory/ of fastrcat dataframe", map_type = "Temperature", depth_range = c(5,10))
-
+map_fc(current_path = "path/ to directory/ of fastrcat dataframe",
+       map_type = "Temperature",
+       depth_range = c(5,10))
 ```
 
 ![Temperature Map](DY15-05_Temperature_5_10.png)
@@ -490,8 +498,8 @@ Like the name implies, this function will fill in the missing station name, foci
 **Usage**
 
 ```r
-fill_missing_stations("path/ to directory/ of fastrcat dataframe",
-                      "path/ to directory/ of haul records dataframe")
+fill_missing_stations(path_fc = "path/ to fastrcat/dataframes",
+                      path_haul_records = "path/ to haul/ records")
 
 ```
 
@@ -502,29 +510,54 @@ This function preps data for easy loading into EcoDAAT. You provide it with a pa
 **Usage**
 
 ```r
-to_ecodaat("path/ to directory/of current years fastcat/ dataframes")
+to_ecodaat(fc_data_path = 
+             "path/ to directory/of current years fastcat/ dataframes")
 
 ```
 
 plot_time_series()
 ---
 Use this function when you have historical and the current years data available. The function creates either temperature or salinity plots of core EcoFOCI stations in the Gulf of Alaska. Each plot displays the average temperature or salinity for each meter of depth of the core stations for each year for the months when peak sampling of these regions occured. Line 8 and Semidi area are most commonly sampled in May and June, which is considered Spring. Summer sampling in the Gulf of Alaska has been less frequent and starts in the early 2000's. This summer sampling is in the Semidi core area, summer is considered August and September.Post 2010, these core stations were only sampled in odd numbered years. In the future more core areas will be added. 
+You can add a new cruises data to the historical data by providing the path of the new fastcat data to the fastcat_data parameter. The default is set to FALSE, so you only need to provide the historical data set. You can also set the minimum and maximum depth to display on the plots. These have a default of a minimum depth of 0 meters and a maximum depth of 100 meters.
 
 **Usage**
 
 ```r
-plot_time_series(hist_data = "path/ to directory/of historical .csv", 
-                 fastcat_data = "path to/ current years/fastcat .csv",
+plot_time_series(hist_data = "path/ to directory/of historical .csv",
                  core_stations = "Line 8",
-                 plot_type = "Temperature")
-
+                 plot_type = "temperature",
+                 min_depth = 0,
+                 max_depth = 100, 
+                 fastcat_data = FALSE)
 ```
+
+![Line 8 Historical Data](historical_plot.png)
+
+
+boxplot_time_series()
+---
+This takes the same paramters as plot_time_series(), it produces a boxplot of plot_type by year. It displays the historical median and its' standaerd deviation.  
+
+**Usage**
+
+```r
+boxplot_time_series(hist_data = "path/ to directory/of historical .csv",
+                 core_stations = "Line 8",
+                 plot_type = "temperature",
+                 min_depth = 5,
+                 max_depth = 15, 
+                 fastcat_data = FALSE)
+```
+
+![Line 8 Historical Data](boxplot_example.png)
+
 
 
 Using FastrCAT at Sea
 ---
 Since people are already familiar with using the command line to run the Perl script out at sea it seemed logical to have people do the same for the R package functions. 
-Requirements for running the package out at sea.
+Requirements for running the package out at sea. These instructions are specific to the 
+at-sea computers which are running Windows operating systems. 
 
 1.The most current version of R, R (32-bit) version 3.5.1 – “Feather Spray” must be installed on the at sea laptops.
 
