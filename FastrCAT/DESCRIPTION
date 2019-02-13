@@ -7,7 +7,7 @@ Maintainer: Nissa Ferm <nissa.ferm@noaa.gov>
 Description: Collection of tools for EcoFOCI fastcat .up files. 
 License: CC0
 BugReports: https://github.github.com/Copepoda/FastrCAT/FastrCAT/issues
-Depends: R (>= 3.5.0),
+Depends: R (>= 3.5.0)
 Imports: sf(>= 0.6.3),
   gstat(>= 1.1.6),
   rgeos(>= 0.4.1),
