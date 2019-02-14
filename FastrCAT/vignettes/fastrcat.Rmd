@@ -128,12 +128,6 @@ When this occurs then header information is still gathered so there is a record 
 
 Provides a short paragraph of number of tows, salinity, temperature, and location information. Summary statistics: minimum, median, mean, max, and number of NA’s are also provided. This provides the user a paragraph ready for a cruise report and can be used as a quick data check.  There is a plot of the average temperature salinity plot profile with 95% confidence intervals. A station map. And QA/QC information about missing header data, no data files, and files which contained outlier salinity and temperature data which was filtered out. If data seems incorrect then it is advised that values be corrected in MasterCOD and then to re-run the perl script and make_dataframe_fc(). Then a new summary will be generated. 
 
-**Example of Cruise Summary**
-
-```{r, echo = FALSE, results = 'asis'}
-knitr::asis_output(htmltools::includeHTML("cruise_report_example.html"))
-```
-
 
 plot_ts_fc()
 ---
