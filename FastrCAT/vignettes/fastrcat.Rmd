@@ -77,7 +77,7 @@ This function writes a single data frame in .csv format to file containing ocean
 
 Shows the first four rows and the first seven columns of an example dataframe. 
 ```{r, echo = FALSE}
-example_file <- read.csv("DY15-05_forEcoDAAT.csv")
+example_file <- read.csv("cruise_data_example.csv")
 head(example_file[,c(1:7)],4)
 ```
 
@@ -131,7 +131,7 @@ Provides a short paragraph of number of tows, salinity, temperature, and locatio
 **Example of Cruise Summary**
 
 ```{r, echo = FALSE, results = 'asis'}
-knitr::asis_output(htmltools::includeHTML("DY15-05_Cruise_Report.html"))
+knitr::asis_output(htmltools::includeHTML("cruise_report_example.html"))
 ```
 
 
@@ -147,7 +147,7 @@ These are all .png files which will be located in the plot folder within the cur
 	
 ```{r echo=FALSE, fig.cap= "Correct Output", fig.show='hold'}
 
-knitr::include_graphics("AE10-01_Station_2_2.png")
+knitr::include_graphics("good_ts_plot.png")
 
 ```
 
@@ -155,7 +155,7 @@ For instance in the second plot below, it seems that two tows had the same Stati
 
 ```{r echo=FALSE, fig.cap= "Incorrect Output", fig.show='hold'}
 
-knitr::include_graphics("AE10-01_Station_41_2.png")
+knitr::include_graphics("bad_ts_plot.png")
 
 ```
 
@@ -176,7 +176,7 @@ Here is an example of a sampling intensity map. Scales for legend will always be
 
 ```{r echo=FALSE, fig.cap= "Sample Intensity Map", fig.show='hold'}
 
-knitr::include_graphics("DY1705_SampleIntensity.png")
+knitr::include_graphics("sample_intensity_example.png")
 
 ```
 
@@ -190,7 +190,7 @@ map_fc(current_path = "path/ to directory/ of fastrcat dataframe",
 
 ```{r echo=FALSE, fig.cap= "Temperature Map", fig.show='hold'}
 
-knitr::include_graphics("DY15-05_Temperature_5_10.png")
+knitr::include_graphics("temperature_map_example.png")
 
 ```
 
