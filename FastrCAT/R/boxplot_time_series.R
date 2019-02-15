@@ -100,6 +100,15 @@ boxplot_time_series <- function(hist_data, core_stations, plot_type,
       dplyr::filter(DEPTH_BOTTOM >= 100 & DEPTH_BOTTOM <= 150)
   }
 
+  first_day <- lubridate::day(min(range_filter$DATE, na.rm = TRUE))
+  start_month <- as.character(lubridate::month(min(range_filter$DATE,
+                                                   na.rm = TRUE), label = TRUE))
+  last_day <- lubridate::day(max(range_filter$DATE, na.rm = TRUE))
+  stop_month <- as.character(lubridate::month(max(range_filter$DATE,
+                                                  na.rm = TRUE), label = TRUE))
+  season <- paste("\t", "within year range from", start_month, first_day,"to",
+                  stop_month, last_day, sep = " ")
+
   plot_data <- if(plot_type == "temperature"){
 
       range_filter %>%
@@ -171,20 +180,22 @@ box_plot_series <- ggplot2::ggplot(data = plot_data)+
   ggplot2::geom_hline(yintercept = median_plot_type + sd_plot_type, color = "blue",
                       linetype = "dotted")+
   ggplot2::geom_hline(yintercept = median_plot_type, color = "red", size = 1)+
-  ggplot2::geom_boxplot(ggplot2::aes(factor(YEAR), VAR),
+  ggplot2::geom_boxplot(ggplot2::aes(YEAR, VAR, group = YEAR),
                         outlier.colour = "#d88c00", outlier.shape = 21, alpha = 0.8,
                         varwidth = TRUE)+
-  ggplot2::theme_linedraw()+
+  ggplot2::theme_classic()+
   ggplot2::ylab(label = name_y_axis)+
   ggplot2::xlab(label = "Year")+
   ggplot2::ggtitle(label = paste(core_stations,": from ", min_depth, " to ",
-                                 max_depth, " meters", sep = ""))+
+                                 max_depth, " meters", sep = ""),
+                   subtitle = season)+
   ggplot2::theme(
     axis.text.y = ggplot2::element_text(face = "bold", size = 18),
     axis.text.x = ggplot2::element_text(face = "bold", size = 18),
     axis.title.x  = ggplot2::element_text(face = "bold", size = 20),
     axis.title.y  = ggplot2::element_text(face = "bold", size = 20),
-    title = ggplot2::element_text(face = "bold", size = 18))
+    title = ggplot2::element_text(face = "bold", size = 18),
+    plot.subtitle = ggplot2::element_text(face = "italic", size = 15))
 
 grDevices::png(filename = name_time_series_plot, width = 325, height = 250,
                units = "mm", res = 350, bg = "transparent")
