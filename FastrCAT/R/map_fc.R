@@ -142,7 +142,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, SALINITY1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
 
   } else {
     fc_data %>% dplyr::filter(
@@ -151,7 +152,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, SALINITY1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
   }
 
 
@@ -210,7 +212,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, TEMPERATURE1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
 
   } else {
     fc_data %>% dplyr::filter(
@@ -219,7 +222,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, TEMPERATURE1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
   }
 
 
