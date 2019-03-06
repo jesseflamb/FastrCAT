@@ -435,7 +435,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
                                                     FOCI_GRID, TEMPERATURE1)%>%
       dplyr::filter(TEMPERATURE1 < -3 | TEMPERATURE1 > 20)
 
-    if(dim(bad_temperature)[1] != 0){
+    if(nrow(bad_temperature) > 0){
       bad_temperature <- bad_temperature %>%
         dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
       dplyr::summarise(Min_value = ifelse(min(TEMPERATURE1, na.rm = TRUE) <= -3,
@@ -447,12 +447,13 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
 
 # Bind together bad salinity and temperature for error table ------------------
 
-    if(dim(bad_temperature)[1] != 0 & dim(bad_salinity)[1] != 0){
+    bad_sal_temp <- if(nrow(bad_temperature) > 0 | nrow(bad_salinity) > 0){
 
-      bad_sal_temp <- bad_temperature %>% dplyr::bind_rows(bad_salinity)%>%
+      bad_temperature %>% dplyr::bind_rows(bad_salinity)%>%
         as.data.frame(.)
-    }else{
-      bad_sal_temp <- "No temperature or salinity values out of range."
+    }else if (nrow(bad_temperature) == 0 & nrow(bad_salinity) == 0){
+
+      "No temperature or salinity values out of range."
     }
 
 
@@ -639,7 +640,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     dplyr::distinct(STATION_HAUL, .keep_all = TRUE)
 
 # station_map------------------------------------------------------------------
-  fc_map <- ggplot2::ggplot()+
+ fc_map <- ggplot2::ggplot()+
     ggplot2::geom_sf(color = "black", data = BATH_200[3], alpha = 0)+
     ggplot2::geom_sf(fill ="#a7ad94", color = "black", data = MAP[1])+
     ggspatial::annotation_scale(location = "bl", width_hint = 0.5,
@@ -648,7 +649,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     ggplot2::geom_point(ggplot2::aes(LON, LAT), size = 4, shape = 21, color = "black",
                         fill = "gray", data = Station_map)+
     #ggrepel::geom_text_repel(ggplot2::aes(LON, LAT, label = STATION_HAUL), size = 4,
-                             #color = "black",data = Station_map)+
+    #color = "black",data = Station_map)+
     ggplot2::theme_bw()+
     ggplot2::xlab(label = "Longitude")+
     ggplot2::ylab(label = "Latitude")+
@@ -685,13 +686,13 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     'Plot shows average salinity and temperature (point) and 95% Confidence',
     'Intervals for each integer of depth.',
     '',
-    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "none"}',
+    '```{r, echo = FALSE, message = FALSE}',
     'print(suppressWarnings(ts_plot))',
     '```',
     '### Station Map',
     '',
-    '```{r, echo = FALSE, message = FALSE, results = "hide", fig.keep = "none"}',
-    'print(suppressWarnings(fc_map))',
+    '```{r, echo = FALSE, message = FALSE}',
+    'print(suppressWarnings(fc_map))  ',
     '```',
     '',
     'If any of this looks suspect, check for the values in the .csv file and',
@@ -752,10 +753,18 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     '```')
 
 # Render Cruise Report --------------------------------------------------------
-      markdown::markdownToHTML(text = knitr::knit(text = cruise_report),
-                               output = paste(current_path, paste(cruise_id,
-                                       "Cruise_Report.html", sep = "_"),
-                                       sep = "/"), fragment.only = TRUE)
+
+    cruise_rep_path <- paste(current_path, paste(cruise_id,
+                                               "Cruise_Report.html", sep = "_"),
+                           sep = "/")
+
+
+    file.remove(cruise_rep_path)
+
+
+
+    markdown::markdownToHTML(text = knitr::knit(text = cruise_report),
+                               output = cruise_rep_path, fragment.only = TRUE)
   }
 # End of Cruise report^--------------------------------------------------------
 
