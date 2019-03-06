@@ -4,7 +4,8 @@
 \alias{map_fc}
 \title{Mapping of FastCAT data}
 \usage{
-map_fc(current_path, map_type = "Stations", depth_range = NA)
+map_fc(current_path, map_type = "Stations", depth_range = NA,
+  st_names = FALSE)
 }
 \arguments{
 \item{current_path}{The path to the directory where the .csv file
@@ -26,6 +27,10 @@ should be quoted: "Stations", "Sample Intensity", "Salinity", and
 column will be averaged.Takes a two value vector, a minimum and maximum of
 desired depth range. For example a depth range of 5-10 meters would be
 entered as such c(5,10).}
+
+\item{st_names}{Adds the station names to the station map. This is
+set to FALSE. In most cases adding station names makes the map busy.
+Set to TRUE if you want station names.}
 }
 \value{
 A map of the desired type and depth range for a single cruise.
