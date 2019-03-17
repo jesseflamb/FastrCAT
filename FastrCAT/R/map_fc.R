@@ -21,12 +21,18 @@
 #' column will be averaged.Takes a two value vector, a minimum and maximum of
 #' desired depth range. For example a depth range of 5-10 meters would be
 #' entered as such c(5,10).
+#' @param st_names Adds the station names to the station map. This is
+#' set to FALSE. In most cases adding station names makes the map busy.
+#' Set to TRUE if you want station names.
 #' @return A map of the desired type and depth range for a single cruise.
 #' @export map_fc
 
 
 
-map_fc <- function(current_path, map_type = "Stations", depth_range = NA){
+map_fc <- function(current_path,
+                   map_type = "Stations",
+                   depth_range = NA,
+                   st_names = FALSE){
 
 # find and read in the file created by make_dataframe_fc()---------------------
 
@@ -142,7 +148,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, SALINITY1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
 
   } else {
     fc_data %>% dplyr::filter(
@@ -151,7 +158,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(SALINITY1 = mean(SALINITY1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, SALINITY1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
   }
 
 
@@ -210,7 +218,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, TEMPERATURE1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
 
   } else {
     fc_data %>% dplyr::filter(
@@ -219,7 +228,8 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
       dplyr::group_by(LAT,LON)%>%
       dplyr::summarise(TEMPERATURE1 = mean(TEMPERATURE1, na.rm = TRUE))%>%
       dplyr::select(LON, LAT, TEMPERATURE1)%>%
-      dplyr::mutate_all(na.omit)
+      dplyr::mutate_at(dplyr::vars(-dplyr::group_cols()),
+                       dplyr::funs(na.omit(.)))
   }
 
 
@@ -279,13 +289,22 @@ map_data <- if(map_type == "Stations" | map_type == "Sample Intensity"){
 
 map_choice <- if(map_type == "Stations"){
 
+  if(st_names == TRUE){
+
   ggplot2::ggplot()+
     ggplot2::geom_point(ggplot2::aes(LON, LAT), size = 2, shape = 21,
                                       color = "black", fill = "#7394b5",
-                                      data = map_data)#+
-    #ggrepel::geom_text_repel(ggplot2::aes(LON, LAT, label = STATION_HAUL),
-                             #size = 5, color = "black",
-                             #data = station_map)
+                                      data = map_data)+
+    ggrepel::geom_text_repel(ggplot2::aes(LON, LAT, label = STATION_HAUL),
+                             size = 5, color = "black",
+                             data = map_data)
+
+  }else if (st_names == FALSE){
+    ggplot2::ggplot()+
+      ggplot2::geom_point(ggplot2::aes(LON, LAT), size = 2, shape = 21,
+                          color = "black", fill = "#7394b5",
+                          data = map_data)
+  }
 
 } else if(map_type == "Sample Intensity"){
 

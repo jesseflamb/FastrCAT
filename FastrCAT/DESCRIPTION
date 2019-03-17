@@ -1,7 +1,7 @@
 Package: FastrCAT
 Type: Package
 Title: Analysis of Oceanographic Data from FastCATs
-Version: 0.0.0.9000
+Version: 0.1.0
 Author: person(given = "Nissa", family = "Ferm", email = "nissa.ferm@noaa.gov", role = c("aut","cre"))
 Maintainer: Nissa Ferm <nissa.ferm@noaa.gov>
 Description: Collection of tools for EcoFOCI fastcat .up files. 
@@ -13,7 +13,8 @@ Imports:
  gstat(>= 1.1.6),
  rgeos(>= 0.4.1),
  ggspatial(>= 1.0.2),
- dplyr (>= 0.7.6),
+ ggrepel(>= 0.8.0),
+ dplyr (>= 0.8.0.1),
  ggplot2 (>= 3.0.0),
  grDevices (>= 3.4.2),
  lubridate (>= 1.7.4),
