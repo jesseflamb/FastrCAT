@@ -6,7 +6,9 @@
 #' in the plot folder within the current folder. If a plot folder hasn't been
 #' created, it will create on. It only needs to be run
 #' once to generate a plot for each station. Each dot is a data point.
-#' Check the profile for each station/haul.
+#' Check the profile for each station/haul. Only one Cruise should be
+#' in the folder at each time. If there are multiple cruises in a folder
+#' the cruise name might be incorrect.
 #' @param current_path The path to directory where dataframe created from
 #' make_dataframe_fc() is located.
 #' @inheritParams make_dataframe_fc()
@@ -76,17 +78,17 @@ plot_ts_fc <- function(current_path){
 # Make unique file name -------------------------------------------------------
 
   name_ts_plot <- paste(current_path,"/plots/",cruise_name, "_Station_",
-                        unique_stations[i], ".png",sep = "")
+                        unique_stations[i], ".png",sep = "")[1]
 
 # Make plot name (station or foci grid) ---------------------------------------
 
   plot_title <- if(length(unique_stations_one) < 2){
       plot_title <- paste("Cruise ",cruise_name,"\nFOCI GRID ",
-                          unique_foci_grid[i], sep = "")
+                          unique_foci_grid[i], sep = "")[1]
     } else {
       plot_title <- paste("Cruise ",cruise_name,"\n", "Station ",
                           stringr::str_replace(unique_stations[i],
-                                      "_", " Haul "), sep = "")
+                                      "_", " Haul "), sep = "")[1]
     }
 
 # Determine filter for unique station/ foci grid ------------------------------
@@ -106,8 +108,11 @@ plot_ts_fc <- function(current_path){
    } else if (max(filtered_data$DEPTH, na.rm = TRUE) > 100 &
               max(filtered_data$DEPTH, na.rm = TRUE) < 200){
      depth_breaks <- seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 , by = 20)
-   } else {
+   } else if(max(filtered_data$DEPTH, na.rm = TRUE) > 16 &
+             max(filtered_data$DEPTH, na.rm = TRUE) < 100){
      depth_breaks <- seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,by = 4)
+   } else {
+     depth_breaks <- seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,by = 1)
    }
 
   depth_labels <- if(max(filtered_data$DEPTH, na.rm = TRUE) >= 200){
@@ -117,9 +122,13 @@ plot_ts_fc <- function(current_path){
             max(filtered_data$DEPTH, na.rm = TRUE) < 200) {
     depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
                             by = 20))
-  } else {
+  } else if(max(filtered_data$DEPTH, na.rm = TRUE) > 16 &
+            max(filtered_data$DEPTH, na.rm = TRUE) < 100){
     depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
                             by = 4))
+  } else {
+    depth_labels <- abs(seq(-(max(filtered_data$DEPTH, na.rm = TRUE)),0 ,
+                            by = 1))
   }
 
 # Plot data --------------------------------------------------------------------
@@ -155,7 +164,7 @@ plot_ts_fc <- function(current_path){
   grDevices::png(filename = name_ts_plot, width = 500, height = 600,
                  units = "px", bg = "transparent")
 
-  print(ts_plot)
+  suppressWarnings(print(ts_plot))
 
   grDevices::dev.off()
 
