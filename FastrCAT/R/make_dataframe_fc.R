@@ -410,52 +410,6 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
       bongo_data <- bongo_data %>% dplyr::mutate(DEPTH = as.integer(NA))
     }
 
-# Find which casts have bad salinities ----------------------------------------
-
-    bad_salinity <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
-                                                 HAUL_NAME,
-                                                 FOCI_GRID, SALINITY1)%>%
-      dplyr::filter(SALINITY1 < 0.05 | SALINITY1 > 38)
-
-    if(dim(bad_salinity)[1] != 0){
-      bad_salinity <- bad_salinity %>%
-      dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
-      dplyr::summarise(Min_value = ifelse(min(SALINITY1, na.rm = TRUE) <= 0.05,
-                                          min(SALINITY1, na.rm = TRUE), NA),
-                       Max_value = ifelse(max(SALINITY1, na.rm = TRUE) >= 38,
-                                          max(SALINITY1, na.rm = TRUE), NA))%>%
-      dplyr::mutate(ERROR_TYPE = "Salinity")
-    }
-
-
-# Find which casts have bad temperature ----------------------------------------
-
-    bad_temperature <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME,
-                                                    HAUL_NAME,
-                                                    FOCI_GRID, TEMPERATURE1)%>%
-      dplyr::filter(TEMPERATURE1 < -3 | TEMPERATURE1 > 20)
-
-    if(nrow(bad_temperature) > 0){
-      bad_temperature <- bad_temperature %>%
-        dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
-      dplyr::summarise(Min_value = ifelse(min(TEMPERATURE1, na.rm = TRUE) <= -3,
-                                          min(TEMPERATURE1, na.rm = TRUE), NA),
-                       Max_value = ifelse(max(TEMPERATURE1, na.rm = TRUE) >= 20,
-                                          max(TEMPERATURE1, na.rm = TRUE), NA))%>%
-      dplyr::mutate(ERROR_TYPE = "Temperature")
-      }
-
-# Bind together bad salinity and temperature for error table ------------------
-
-    bad_sal_temp <- if(nrow(bad_temperature) > 0 | nrow(bad_salinity) > 0){
-
-      bad_temperature %>% dplyr::bind_rows(bad_salinity)%>%
-        as.data.frame(.)
-    }else if (nrow(bad_temperature) == 0 & nrow(bad_salinity) == 0){
-
-      "No temperature or salinity values out of range."
-    }
-
 
 # Rearrange columns for EcoDAAT format ----------------------------------------
     bongo_data <- bongo_data %>% dplyr::select(CRUISE, STATION_NAME, HAUL_NAME,
@@ -463,12 +417,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
                                                DEPTH_BOTTOM, DEPTH,PRESSURE,
                                                TEMPERATURE1, SALINITY1,
                                                CONDUCTIVITY1, SIGMA_T,
-                                               INSTRUMENT, DIRECTORY)%>%
-# Filters out bad temperatures ------------------------------------------------
-                  dplyr::filter(TEMPERATURE1 >= -3 & TEMPERATURE1 <= 20)%>%
-# Filters out bad salinities --------------------------------------------------
-                  dplyr::filter(SALINITY1 >= 0.05  & SALINITY1 <= 38)
-
+                                               INSTRUMENT, DIRECTORY)
 
 # Appends finished files to cruise list ---------------------------------------
     cruise_data[[i]] <- bongo_data
@@ -476,8 +425,24 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
   }
 
 # Make problem files text -----------------------------------------------------
-  no_data_files <- data.frame(unlist(no_data_files))
-  No_head_files <- data.frame(unlist(no_head_files))
+  no_data_files <- if(nrow(data.frame(unlist(no_data_files))) == 0){
+
+    "All files contained data."
+
+  } else if(nrow(data.frame(unlist(no_data_files))) > 1){
+
+    data.frame(unlist(no_data_files))
+  }
+
+  No_head_files <-if(nrow(data.frame(unlist(no_head_files))) == 0){
+
+    "All header information entered into MasterCOD. High Five!"
+
+  } else if(nrow(data.frame(unlist(no_head_files))) > 1){
+
+    data.frame(unlist(no_head_files))
+  }
+
 
 # Make a single file of all cruise data ---------------------------------------
   cruise_data_all <- as.data.frame(dplyr::bind_rows(cruise_data))%>%
@@ -494,6 +459,73 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
                   COMMENTS_SEACAT_CTD = as.character(NA),
                   GEAR_NAME = as.character("CAT"),
                   NET = as.integer(0))
+
+  # Find which casts have bad salinities ----------------------------------------
+
+  bad_salinity <- cruise_data_all %>% dplyr::select(CRUISE, STATION_NAME,
+                                               HAUL_NAME,
+                                               FOCI_GRID, SALINITY1)%>%
+    dplyr::filter(SALINITY1 < 0.05 | SALINITY1 > 38)
+
+  if(dim(bad_salinity)[1] != 0){
+    bad_salinity <- bad_salinity %>%
+      dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
+      dplyr::summarise(Below_Min = ifelse(min(SALINITY1, na.rm = TRUE) <= 0.05,
+                                          min(SALINITY1, na.rm = TRUE), NA),
+                       Above_Max = ifelse(max(SALINITY1, na.rm = TRUE) >= 38,
+                                          max(SALINITY1, na.rm = TRUE), NA))%>%
+      dplyr::mutate(ERROR_TYPE = "Salinity")
+  }
+
+
+  # Find which casts have bad temperature ----------------------------------------
+
+  bad_temperature <- cruise_data_all %>% dplyr::select(CRUISE, STATION_NAME,
+                                                  HAUL_NAME,
+                                                  FOCI_GRID, TEMPERATURE1)%>%
+    dplyr::filter(TEMPERATURE1 < -3 | TEMPERATURE1 > 20)
+
+  if(nrow(bad_temperature) > 0){
+    bad_temperature <- bad_temperature %>%
+      dplyr::group_by(CRUISE, STATION_NAME, HAUL_NAME, FOCI_GRID)%>%
+      dplyr::summarise(Below_Min = ifelse(min(TEMPERATURE1, na.rm = TRUE) <= -3,
+                                          min(TEMPERATURE1, na.rm = TRUE), NA),
+                       Above_Max = ifelse(max(TEMPERATURE1, na.rm = TRUE) >= 20,
+                                          max(TEMPERATURE1, na.rm = TRUE), NA))%>%
+      dplyr::mutate(ERROR_TYPE = "Temperature")
+  }
+
+  # Make bad salinity and temperature for error table ---------------------------
+
+  bad_sal <- if(nrow(bad_salinity) == 0){
+
+    "No salinity values outside of accepted range of below 0.5 and above 38."
+
+  } else if(nrow(bad_salinity) > 0){
+
+    bad_salinity <- as.data.frame(bad_salinity)
+  }
+
+  bad_temp <- if(nrow(bad_temperature) == 0){
+
+    "No temperature values outside of accepted range of below -3 and above 20."
+
+  }else if(nrow(bad_temperature) > 0){
+
+    bad_temperature <- as.data.frame(bad_temperature)
+  }
+
+  cruise_data_all <- cruise_data_all %>%
+  # Revalues bad temperatures as NA's--------------------------------------------
+  dplyr::mutate(TEMPERATURE1 =
+                  ifelse(TEMPERATURE1 >= -3 & TEMPERATURE1 <= 20,
+                         TEMPERATURE1, NA))%>%
+    # Revalues bad salinities as NA's ---------------------------------------------
+  dplyr::mutate(SALINITY1 =
+                  ifelse(SALINITY1 >= 0.05  & SALINITY1 <= 38,
+                         SALINITY1, NA))
+
+
 
 # Generate the Cruise report if set to TRUE------------------------------------
   if(Cruise_report == TRUE){
@@ -566,7 +598,8 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     tidyr::unite(Station_haul,STATION_NAME,HAUL_NAME,sep = "_",
                  remove = FALSE)%>%
     tidyr::gather("TYPE","MEASURMENT",c(TEMPERATURE1,SALINITY1))%>%
-    dplyr::group_by(DEPTH, TYPE)%>%
+    dplyr::filter(!is.na(MEASURMENT))%>%
+    dplyr::group_by(TYPE,DEPTH)%>%
 # Calculates mean and 95% confidence intervals for plot -----------------------
     dplyr::summarise(MEAN = mean(MEASURMENT, na.rm = TRUE),
               CI_95 = mean(MEASURMENT, na.rm = TRUE) +
@@ -684,7 +717,10 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     '### Average Salinity and Temperature Profiles',
     '',
     'Plot shows average salinity and temperature (point) and 95% Confidence',
-    'Intervals for each integer of depth.',
+    'Intervals for each integer of depth. If there is only one temperature or',
+    'salinity value per depth, calculated mean will not be generated for that',
+    'depth. Please refer to the individual plots generated for each station',
+    'if that is the case.',
     '',
     '```{r, echo = FALSE, message = FALSE}',
     'print(suppressWarnings(ts_plot))',
@@ -722,16 +758,26 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     'print(foci_grid_name_check)',
     '```',
     '',
-    '### Anomalous Salinity and Temperature',
+    '### Anomalous Salinity',
     '',
-    'These values for salinity and temperature are outside of known ranges.',
-    'They have been filtered out of the data, because they are outside the',
-    'know ranges for salinity and temperature. NA\'s refer to no outlier',
-    'values found either below the minimum cutoff or above the maximum cutoff.',
-    'If there is no data below, then all readings were within known ranges.',
+    'Stations with values listed below are either above or below acceptable',
+    'ranges known for salinity in the Gulf of Alaska, Bering Sea, or',
+    'Arctic. The range is defined as a salinity between 0.5 and 38 PSU',
+    'Bad values will show up as NAs in the dataframe generated.',
     '```{r,echo = FALSE}',
-    'print(bad_sal_temp)',
+    'print(bad_sal)',
     '```',
+    '',
+    '### Anomalous Temperature',
+    '',
+    'Stations with values listed below are either above or below acceptable',
+    'ranges known for temperature in the Gulf of Alaska, Bering Sea, or',
+    'Arctic. The range is defined as a temperatures between -3 and 20 degrees',
+    'Celcius. Bad values will show up as NAs in the dataframe generated.',
+    '```{r,echo = FALSE}',
+    'print(bad_temp)',
+    '```',
+    '',
     '### No Header Files',
     '',
     'These files have been identified as having no header information. It is most',
