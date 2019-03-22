@@ -22,5 +22,7 @@ plot for each station. These are all .png files which will be located
 in the plot folder within the current folder. If a plot folder hasn't been
 created, it will create on. It only needs to be run
 once to generate a plot for each station. Each dot is a data point.
-Check the profile for each station/haul.
+Check the profile for each station/haul. Only one Cruise should be
+in the folder at each time. If there are multiple cruises in a folder
+the cruise name on plot and file name might be incorrect.
 }
