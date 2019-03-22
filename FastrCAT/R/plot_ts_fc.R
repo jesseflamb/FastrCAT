@@ -8,7 +8,7 @@
 #' once to generate a plot for each station. Each dot is a data point.
 #' Check the profile for each station/haul. Only one Cruise should be
 #' in the folder at each time. If there are multiple cruises in a folder
-#' the cruise name might be incorrect.
+#' the cruise name on plot and file name might be incorrect.
 #' @param current_path The path to directory where dataframe created from
 #' make_dataframe_fc() is located.
 #' @inheritParams make_dataframe_fc()
