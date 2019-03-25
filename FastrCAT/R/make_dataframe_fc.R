@@ -425,22 +425,26 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
   }
 
 # Make problem files text -----------------------------------------------------
-  no_data_files <- if(nrow(data.frame(unlist(no_data_files))) == 0){
+
+
+  No_data_files <- if(is.null(no_data_files) == TRUE){
 
     "All files contained data."
 
-  } else if(nrow(data.frame(unlist(no_data_files))) > 1){
+  } else {
 
     data.frame(unlist(no_data_files))
   }
 
-  No_head_files <-if(nrow(data.frame(unlist(no_head_files))) == 0){
+
+
+  No_head_files <-if(is.null(no_head_files) == TRUE){
 
     "All header information entered into MasterCOD. High Five!"
 
-  } else if(nrow(data.frame(unlist(no_head_files))) > 1){
+  } else {
 
-    data.frame(unlist(no_head_files))
+   data.frame(unlist(no_head_files))
   }
 
 
@@ -782,7 +786,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     '',
     'These files have been identified as having no header information. It is most',
     'likely that you ran the Perl script prior to entering the station COD form',
-    'into MasterCOD. Please re-run Perl script and then make_dataframe_fc()',
+    'into MasterCOD. Please re-run proc_new_mCOD and then make_dataframe_fc()',
     'after you have checked that you enterd the COD form. If there is not',
     'anything below then all header information was present.',
     '```{r, echo = FALSE}',
@@ -795,7 +799,7 @@ make_dataframe_fc <- function(current_path, GE = FALSE, Cruise_report = TRUE,
     'make_dataframe_fc() regardless if they were Good, Questionable, or "Failure.',
     'If there is not a dataframe below then all files contained data.',
     '```{r, echo = FALSE}',
-    'print(no_data_files)',
+    'print(No_data_files)',
     '```')
 
 # Render Cruise Report --------------------------------------------------------
