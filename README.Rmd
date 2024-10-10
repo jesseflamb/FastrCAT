@@ -26,7 +26,7 @@ Full documentation of the process is available in vignettes
 ```{r eval=FALSE}
 install.packages(remotes)
 
-remotes::install_github("Copepoda/FastrCAT/FastrCAT", build = TRUE, 
+remotes::install_github("jesseflamb/FastrCAT/tree/master/FastrCAT", build = TRUE, 
                         build_opts = c("--no-resave-data", "--no-manual"))
 
 ````
